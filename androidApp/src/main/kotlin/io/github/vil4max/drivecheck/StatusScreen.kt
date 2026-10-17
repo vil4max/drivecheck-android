@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -88,6 +89,12 @@ fun StatusContent(state: StatusState, isChecking: Boolean, onRefresh: () -> Unit
             onClick = onRefresh,
             enabled = !isChecking,
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            // Material's disabled default is about 2.5:1 here; the iOS secondary text on the same
+            // fill is about 6:1.
+            colors = ButtonDefaults.buttonColors(
+                disabledContainerColor = DriveCheckColors.buttonFill,
+                disabledContentColor = DriveCheckColors.textSecondary,
+            ),
         ) {
             Text(stringResource(if (isChecking) R.string.status_checking else R.string.action_refresh))
         }

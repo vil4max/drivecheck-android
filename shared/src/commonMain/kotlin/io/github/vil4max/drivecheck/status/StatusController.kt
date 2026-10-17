@@ -67,6 +67,9 @@ class StatusController(
             try {
                 fetch()
             } finally {
+                // The client's own retry may have started a request late in the fetch; stamping
+                // the end keeps the next request at least the gap after it (REQ-ANDROID-001).
+                gate.recordStart(clock.now())
                 _isChecking.value = false
             }
         }

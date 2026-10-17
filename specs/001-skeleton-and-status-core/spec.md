@@ -350,7 +350,9 @@ or a 429 the fetch floor (REQ-REFRESH-010) does not hold, so repeated taps could
 Given the Status screen\
 When any trigger asks for a request\
 Then no request starts less than 2 s after the previous one started, whatever the outcome of that
-one; while a request runs, the Refresh button shows "Checking…" and takes no taps
+one, counting a transient retry inside a fetch as a request (the gap also runs from the end of each
+fetch); while a request runs, the Refresh button shows "Checking…" and takes no taps, in a colour
+that stays readable (at least 4.5:1 against its fill)
 
 Differs from iOS: Android-only. iOS has no such minimum gap; its phone refresh is a pull.
 
