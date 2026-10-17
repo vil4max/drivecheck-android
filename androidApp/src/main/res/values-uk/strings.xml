@@ -5,9 +5,9 @@
     <string name="status_checking">Перевіряємо…</string>
     <string name="status_unavailable">Недоступно</string>
     <string name="status_region_unavailable">Регіон недоступний</string>
-    <string name="status_updated">Оновлено: %1$s</string>
+    <string name="status_updated">Оновлено %1$s</string>
     <string name="action_refresh">Оновити</string>
-    <string name="hint_unavailable">Натисніть «Оновити», щоб спробувати знову</string>
+    <string name="hint_unavailable">Потягніть униз, щоб оновити й спробувати знову</string>
     <string name="informational_source">Дані тривог мають інформаційний характер. Не покладайтеся на них при критичних рішеннях.</string>
     <string name="status_stay_alert">Будьте уважні</string>
     <string name="status_no_current_data">Немає актуальних даних</string>

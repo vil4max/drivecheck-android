@@ -20,6 +20,9 @@ object DriveCheckColors {
     val textPrimary = Color(0xFFF2F3F5)
     val textSecondary = Color(0xFFA3A7AE)
     val buttonFill = Color(0xFF282B31)
+    // Cards: white 6 % fill with a white 10 % stroke (iOS RedesignColors.surface, surfaceStroke).
+    val surface = Color(0x0FFFFFFF)
+    val surfaceStroke = Color(0x1AFFFFFF)
 }
 
 private val scheme = darkColorScheme(

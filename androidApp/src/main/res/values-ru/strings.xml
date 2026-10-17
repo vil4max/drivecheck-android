@@ -5,9 +5,9 @@
     <string name="status_checking">Проверяем…</string>
     <string name="status_unavailable">Недоступно</string>
     <string name="status_region_unavailable">Регион недоступен</string>
-    <string name="status_updated">Обновлено: %1$s</string>
+    <string name="status_updated">Обновлено %1$s</string>
     <string name="action_refresh">Обновить</string>
-    <string name="hint_unavailable">Нажмите «Обновить», чтобы попробовать снова</string>
+    <string name="hint_unavailable">Потяните вниз, чтобы обновить и попробовать снова</string>
     <string name="informational_source">Данные тревог носят информационный характер. Не полагайтесь на них при критических решениях.</string>
     <string name="status_stay_alert">Будьте внимательны</string>
     <string name="status_no_current_data">Нет актуальных данных</string>

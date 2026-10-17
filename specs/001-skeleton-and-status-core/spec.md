@@ -326,6 +326,12 @@ Differs from iOS: only the phone Status screen exists, so only the full form is 
 form arrives with the widget spec. The error hint names the Refresh button, where iOS says "Pull to
 refresh and try again"; its uk and ru text is new, approved by the owner at the start gate.
 
+Amended 2026-10-17 by spec 002, for visual parity with the iOS app (owner, through the orchestrator):
+the update line takes the iOS phone wording without a colon ("Updated 13:07", "Оновлено 13:07",
+"Обновлено 13:07"), the error hint takes the iOS pull wording ("Pull to refresh and try again" and
+its uk and ru forms), the status word is drawn in the status colour, and times follow the device
+locale (24 h in uk and ru).
+
 Amended 2026-10-17 by spec 002: the region list's status pills use the short form ("No Alert" /
 "Alert" and their uk and ru forms, as in the iOS short-form table).
 
@@ -348,6 +354,9 @@ Differs from iOS: iOS states this on the Details tab. This feature has one scree
 test on Google Play starts with this build, so testers see the provider's warning from the first
 install.
 
+Amended 2026-10-17 by spec 002, for visual parity (owner, through the orchestrator): the line moves
+to the Details tab, as on iOS (REQ-ANDROID-004).
+
 ### REQ-ANDROID-001 — Requests at least 2 s apart, with Checking shown
 
 Status: approved (owner, 2026-10-17, review finding L2, answer «A»)
@@ -366,6 +375,11 @@ fetch); while a request runs, the Refresh button shows "Checking…" and takes n
 that stays readable (at least 4.5:1 against its fill)
 
 Differs from iOS: Android-only. iOS has no such minimum gap; its phone refresh is a pull.
+
+Amended 2026-10-17 by spec 002, for visual parity with the iOS app (owner, through the orchestrator):
+the Refresh button is replaced by pull to refresh, as on the iPhone, with a TalkBack "Refresh"
+action on the hero. While a request runs, the pull indicator shows and a new pull starts nothing.
+The 2 s gap is unchanged. The 4.5:1 clause applied to the disabled button and lapses with it.
 
 Look (owner, 2026-10-17): the Status screen uses the iOS app's palette and, like it, is dark only;
 status colours are never themed, and there is no wallpaper-based dynamic colour. The colour only
