@@ -77,7 +77,11 @@ class StatusWidgetProvider : AppWidgetProvider() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == ACTION_REFRESH) refreshAndRender(context, isScheduled = false) else super.onReceive(context, intent)
+        when (intent.action) {
+            ACTION_REFRESH -> refreshAndRender(context, isScheduled = false)
+            ACTION_REDRAW -> Surfaces.updateAll(context)
+            else -> super.onReceive(context, intent)
+        }
     }
 
     private fun refreshAndRender(context: Context, isScheduled: Boolean) =
@@ -85,6 +89,7 @@ class StatusWidgetProvider : AppWidgetProvider() {
 
     companion object {
         const val ACTION_REFRESH = "io.github.vil4max.drivecheck.action.WIDGET_REFRESH"
+        const val ACTION_REDRAW = "io.github.vil4max.drivecheck.action.SURFACES_REDRAW"
 
         fun render(context: Context) {
             val manager = AppWidgetManager.getInstance(context)

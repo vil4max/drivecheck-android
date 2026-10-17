@@ -96,6 +96,15 @@ object AlertNotificationPolicy {
     fun isStale(checkedAt: Instant, now: Instant): Boolean = now - checkedAt > STALE_AFTER
 }
 
+// The moments a stored snapshot changes how the surfaces look, so a closed app can redraw them
+// without a fetch (REQ-REFRESH-009, REQ-SURF-003).
+object SurfaceSchedule {
+    private val BOUNDARIES = listOf(3.minutes, 10.minutes, 15.minutes + 1.seconds)
+
+    fun nextRedraw(checkedAt: Instant, now: Instant): Instant? =
+        BOUNDARIES.map { checkedAt + it }.firstOrNull { it > now }
+}
+
 enum class BackgroundOutcome { Fetched, Held, Failed }
 
 // One fetch outside the app: a widget update or a notification action (REQ-REFRESH-008). A
