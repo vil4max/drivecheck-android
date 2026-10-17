@@ -175,6 +175,10 @@ Amended 2026-10-17 by spec 003: the trigger list gains the widget's periodic upd
 longer, at the system's schedule, skipped inside a stored rate-limit window), the widget's Refresh
 button, and the notification's Refresh action.
 
+Amended 2026-10-17 by spec 004: the trigger list gains the Android Auto screen starting and its
+Refresh action; the car shares the phone's controller, so the fetch floor and the in-flight join
+hold across both.
+
 ### REQ-REFRESH-001 — Fetch only for an active surface
 
 Status: approved
