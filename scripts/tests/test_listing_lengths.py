@@ -14,8 +14,8 @@ listing = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(listing)
 
 
-def page(short: str, full: str = "Full.") -> str:
-    return f"## en-US\n\n### Short description\n\n```\n{short}\n```\n\n### Full description\n\n```\n{full}\n```\n"
+def page(short: str, full: str = "Full.", name: str = "DriveCheckUA") -> str:
+    return f"| App name | 30 | {name} |\n\n## en-US\n\n### Short description\n\n```\n{short}\n```\n\n### Full description\n\n```\n{full}\n```\n"
 
 
 class ListingLengthsTest(unittest.TestCase):
@@ -34,8 +34,17 @@ class ListingLengthsTest(unittest.TestCase):
             listing.check(page("x", "Works in android auto.")),
         )
 
+    def test_a_ukrainian_car_screen_promise_is_reported(self):
+        self.assertEqual(
+            ["en-US Short description: promises екрані авто, which 1.0 does not ship"],
+            listing.check(page("Статус на екрані авто")),
+        )
+
+    def test_a_long_app_name_is_reported(self):
+        self.assertEqual(["App name: 31 > 30"], listing.check(page("x", name="n" * 31)))
+
     def test_a_page_without_texts_fails(self):
-        self.assertEqual(["no listing text found"], listing.check("## en-US\n"))
+        self.assertEqual(["no listing text found", "no app name found"], listing.check("## en-US\n"))
 
     def test_the_real_listing_fits(self):
         result = subprocess.run([sys.executable, str(SCRIPT)], capture_output=True, text=True)

@@ -9,6 +9,6 @@
     <string name="notification_channel">Air raid alert</string>
     <string name="details_section_notification">NOTIFICATION</string>
     <string name="notification_switch">Notification during an alert</string>
-    <string name="notification_switch_caption">Lock screen and notification shade, until the all-clear</string>
+    <string name="notification_switch_caption">When the app or the widget sees an alert, until the all-clear. Not a push alert</string>
     <string name="notifications_blocked">Notifications are off in Android settings</string>
 </resources>
