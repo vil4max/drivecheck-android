@@ -27,6 +27,12 @@ tested in `commonTest`; the Android app is a thin screen over one `ViewModel`.
 
 ### Assumptions to check when the skeleton exists
 
+Results, 2026-10-17, on the hand-written skeleton (Kotlin 2.4.21, AGP 9.4.1, Gradle 9.8.1, JDK 17):
+A1 does not apply (no wizard; the skeleton uses the Android-KMP library plugin by design). A2 holds:
+a failing `commonTest` probe failed `testAndroidHostTest`. A3 is met by minSdk 26. A4 holds: on the
+Mac `check` also ran `iosSimulatorArm64Test`. A5 is proven by `compileTestKotlinIosSimulatorArm64`
+once tests exist.
+
 | # | Assumption | How to check |
 |---|---|---|
 | A1 | The wizard generates `androidApp` and `shared` with the Android-KMP library plugin (`com.android.kotlin.multiplatform.library`) on AGP 9. Kotlin's quickstart (dated 2026-10-02) lists those modules but states no AGP version. | Read the generated `gradle/libs.versions.toml` and `shared/build.gradle.kts`. If the template is older, follow Kotlin's [AGP 9 migration guide](https://kotlinlang.org/docs/multiplatform/multiplatform-project-agp-9-migration.html). |
