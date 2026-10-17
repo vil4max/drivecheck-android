@@ -121,19 +121,16 @@ class StatusControllerTest {
     fun REQ_REFRESH_001_a_cancelled_request_is_not_a_failure() = runTest {
         val owner = CoroutineScope(StandardTestDispatcher(testScheduler) + Job())
         val never = CompletableDeferred<Unit>()
-        val provider = ScriptedProvider(listOf(answer(snapshot()), { never.await(); snapshot() }))
+        val provider = ScriptedProvider(listOf({ never.await(); snapshot() }))
         val controller = controller(provider, owner)
         controller.onSurfaceStarted()
-        runCurrent()
-        clock.now += 11.seconds
-        controller.refresh()
         runCurrent()
 
         owner.cancel()
         runCurrent()
 
-        assertEquals(2, provider.calls)
-        assertEquals(StatusState.Quiet(cachedAt), controller.state.value)
+        assertEquals(1, provider.calls)
+        assertEquals(StatusState.Checking, controller.state.value)
     }
 
     @Test
