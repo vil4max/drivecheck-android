@@ -52,7 +52,7 @@ class CarStatusScreen(
         val statusRow = Row.Builder()
             .setTitle(carContext.getString(R.string.tab_status))
             .addText(carContext.getString(statusWord(presentation)))
-            .addText(carContext.getString(current.region.nameRes()) + " · " + meta(presentation, current.isChecking))
+            .addText(listOfNotNull(carContext.getString(current.region.nameRes()), meta(presentation, current.isChecking)).joinToString(" · "))
         icon(presentation)?.let(statusRow::setImage)
         val nearbyRow = Row.Builder()
             .setTitle(carContext.getString(R.string.car_row_nearby))
@@ -76,14 +76,15 @@ class CarStatusScreen(
     private fun statusWord(presentation: StatusPresentation): Int =
         if (presentation.isStale) R.string.status_no_current_data else presentation.phase.titleRes()
 
-    private fun meta(presentation: StatusPresentation, isChecking: Boolean): String {
+    // The time line; with no data yet the status word already says "Checking…", so it adds nothing.
+    private fun meta(presentation: StatusPresentation, isChecking: Boolean): String? {
         val checkedAt = presentation.checkedAt
-        val age = when {
+        return when {
             presentation.phase == DisplayPhase.Unavailable -> carContext.getString(R.string.hint_unavailable)
-            checkedAt == null -> carContext.getString(R.string.status_checking)
+            checkedAt == null -> null
+            isChecking -> carContext.getString(R.string.status_updated, time(checkedAt)) + " · " + carContext.getString(R.string.status_checking)
             else -> carContext.getString(R.string.status_updated, time(checkedAt))
         }
-        return if (isChecking && checkedAt != null) age + " · " + carContext.getString(R.string.status_checking) else age
     }
 
     private fun nearbyNames(regions: List<AlertRegion>): String? {

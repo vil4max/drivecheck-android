@@ -11,10 +11,14 @@ Feature: `004-android-auto` · One PR, one commit per group, tests first.
   the manifest; specs 002 T018 and 005 updated.
 - [x] T005 PR with the review packet.
 - [x] T007 Review fixes: the template quota (H1), stale reads No Current Data (M1), the CarPlay
-  refresh cycle (M2), session wiring tests (M3), the review-risk note (M4); lows L1, L2, L5, L6.
+  refresh cycle (M2), session wiring tests (M3), the review-risk note (M4); lows L1, L2, L5, L6; re-review lows: the supersession test, the cycle ends on disconnect, one Checking, spec 002 wording.
 - [ ] T006 Desktop Head Unit and real-car runs (SC-003), when a device is available.
 
 ## Backlog from the review
 
 - L3: on a fresh install the car shows Kyiv as if resolved; it has no "no region yet" state.
 - L4: with the phone and the car both started, each update redraws the widget twice.
+- Owner decision: stale data still lists nearby regions, on the car and on the phone
+  (`StatusPresenter` computes them from any snapshot). iOS drops the nearby sentence from the
+  summary while stale but keeps the row; whether the car and the phone should hide stale nearby
+  names is the owner's call.
