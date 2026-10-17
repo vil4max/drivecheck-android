@@ -74,7 +74,7 @@ fun OnboardingScreen(onGetStarted: () -> Unit) {
                 .border(1.dp, DriveCheckColors.surfaceStroke, RoundedCornerShape(24.dp))
                 .padding(horizontal = 16.dp),
         ) {
-            OnboardingRow(Glyph.Wheel, R.string.onboarding_glance_title, R.string.onboarding_glance_caption)
+            OnboardingRow(Glyph.Wheel, R.string.onboarding_car_title, R.string.onboarding_car_caption)
             HorizontalDivider(color = DriveCheckColors.surfaceStroke)
             OnboardingRow(Glyph.Arrow, R.string.onboarding_location_title, R.string.onboarding_location_caption)
             HorizontalDivider(color = DriveCheckColors.surfaceStroke)

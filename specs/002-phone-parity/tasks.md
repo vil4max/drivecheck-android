@@ -85,5 +85,5 @@ Deviation: groups 6 and 7 landed as one commit, because the Details tab is part 
 - [x] T018 Before any build reaches Google Play testers: the Android Auto screen exists (a later
   slice), or the onboarding copy that promises it ("designed for Android Auto", "One glance in
   Android Auto") is changed to what the build actually ships (orchestrator, 2026-10-17).
-  Done in spec 005: no Android Auto in 1.0 (owner, 2026-10-17); the copy names the widget and the
-  tile, guarded by `ReleaseCopyGuardTest`.
+  Done: spec 004 ships the Android Auto screen (owner, 2026-10-17), so the onboarding names it again;
+  `ReleaseCopyGuardTest` allows the promise only while the manifest declares the car service.
