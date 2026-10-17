@@ -25,6 +25,9 @@ third-party analytics. The iOS app is not changed from here.
 - One pull request per feature, commits by task group, with a review packet in the
   description: each group's task, its diff, the tests proving it, review findings and their
   outcome, runtime evidence, risk. Merge only after the owner approves.
-- Gate: `./gradlew check` plus the iOS-target compile of `shared`; CI runs the same commands.
+- Gate, in three parts; CI (`.github/workflows/gate.yml`) runs the same commands:
+  `./gradlew check`; the iOS-target compile of `shared` (main and test sources); and the
+  requirement trace check, `python3 scripts/spec-trace.py` (with `--results .` after `check`),
+  whose own tests run with `python3 -m unittest discover -s scripts/tests`.
 - Release channel: Google Play. A closed test with at least 12 testers for 14 days precedes
   production access, so it starts with the first usable build.

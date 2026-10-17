@@ -3,7 +3,8 @@
 Feature: `001-skeleton-and-status-core` · Spec: [spec.md](spec.md) · Plan: [plan.md](plan.md)
 Created: 2026-10-17 · Status: approved by the owner at the start gate on 2026-10-17
 
-One pull request for the feature; one commit per group, in order. Inside a group, each test task
+One pull request for the feature; one commit per group, in the order "Dependencies" gives. Inside a
+group, each test task
 comes first and is seen failing before its code task; the review packet records the failing run.
 `[P]` marks a task that can run in parallel with the previous one (different files, no
 dependency). `[Owner]` marks a task only the owner can do. Test names below are the planned
@@ -36,22 +37,24 @@ Commit: `build: create the project from the Kotlin Multiplatform template`
   with the serialization plugin in `shared`.
 - [ ] T008 Prove A2: add a temporary failing test in `shared/src/commonTest`, see
   `./gradlew check` fail, remove it, see `./gradlew check` pass.
-- [ ] T009 Create the local project marker `.agents/project-context.yaml` (`kind: personal`)
-  through the kit's project setup; `install` waits for the owner's yes. Not committed.
+- [x] T009 Check that the local project marker `.agents/project-context.yaml` (`kind: personal`)
+  is present in the checkout that builds. Project setup already wrote it in the main checkout; an
+  app-made worktree gets a copy, since the file is ignored by Git. Not committed.
 
 ## Group 2 — gate
 
 Commit: `ci: run the gate and the requirement trace check`
 
-- [ ] T010 Write `scripts/tests/test_spec_trace.py` first: an approved requirement with no citing
+- [x] T010 Write `scripts/tests/test_spec_trace.py` first: an approved requirement with no citing
   test fails; a test citing an undefined ID fails; a duplicate definition fails; an uncited
   proposed requirement passes; with `--results`, a skipped or failed citing test does not count and
   a passed one does. See it fail with no script.
-- [ ] T011 Write `scripts/spec-trace.py` (plan.md "Requirement trace check") until T010 passes.
-- [ ] T012 Run it on the repository: no approved requirement is cited yet, so it must fail on the
+- [x] T011 Write `scripts/spec-trace.py` (plan.md "Requirement trace check") until T010 passes.
+- [x] T012 Run it on the repository: no approved requirement is cited yet, so it must fail on the
   approved IDs of this spec; record the output. Groups 3 to 7 turn it green.
-- [ ] T013 Write `.github/workflows/gate.yml` (plan.md "CI") with actions pinned to commit SHAs.
-- [ ] T014 [P] Update `AGENTS.md` "Gate" to name the three parts: `./gradlew check`, the iOS-target
+- [x] T013 Write `.github/workflows/gate.yml` (plan.md "CI") with actions pinned to commit SHAs.
+  Its JDK version and Gradle task names are checked against the skeleton in T006.
+- [x] T014 [P] Update `AGENTS.md` "Gate" to name the three parts: `./gradlew check`, the iOS-target
   compile of `shared`, and the trace check.
 
 Until group 7 lands, the trace job is expected to fail on this pull request: the trace check
@@ -167,6 +170,7 @@ Commit: `feat(android): show Kyiv city's alert status with Refresh`
 
 ## Dependencies
 
-- Group 0 before everything; T003 and T004 before T005; group 1 before groups 2 to 7.
-- Groups 3 → 4 → 5 → 6 → 7 in order; group 2 can land any time after group 1.
+- Group 0 before everything; T003 and T004 before T005; group 1 before groups 3 to 7.
+- Group 2 needs no skeleton and lands before group 1 (owner, 2026-10-17).
+- Groups 3 → 4 → 5 → 6 → 7 in order.
 - T020 and T021 need T019's types; T024 and T025 need T021.
