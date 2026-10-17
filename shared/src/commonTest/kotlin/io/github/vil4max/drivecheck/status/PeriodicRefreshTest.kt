@@ -62,6 +62,29 @@ class PeriodicRefreshTest {
         assertEquals(3, provider.calls, "alarm: 30 s")
     }
 
+    // iOS shares one timer between CarPlay and the phone; Android counts its surfaces (the phone
+    // and the car), so one stopping never stops the other's refresh.
+    @Test
+    fun REQ_REFRESH_002_one_timer_runs_while_any_surface_is_started() = runTest {
+        val provider = CountingProvider { snapshot(AlertStatus.Quiet) }
+        val controller = controller(provider)
+
+        controller.onSurfaceStarted()
+        runCurrent()
+        controller.onSurfaceStarted()
+        runCurrent()
+        assertEquals(1, provider.calls, "the second start joins: the fetch floor holds it")
+        controller.onSurfaceStopped()
+        advanceTimeBy(60.seconds)
+        runCurrent()
+        assertEquals(2, provider.calls, "one surface is still started")
+
+        controller.onSurfaceStopped()
+        advanceTimeBy(10.minutes)
+        runCurrent()
+        assertEquals(2, provider.calls, "no surface: no timer")
+    }
+
     @Test
     fun REQ_REFRESH_002_power_saver_polls_every_five_minutes() = runTest {
         val provider = CountingProvider { snapshot(AlertStatus.Alarm) }
