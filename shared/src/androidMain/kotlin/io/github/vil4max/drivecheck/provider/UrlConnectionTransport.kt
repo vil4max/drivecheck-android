@@ -2,8 +2,10 @@ package io.github.vil4max.drivecheck.provider
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.EOFException
 import java.io.IOException
+import java.io.InputStream
 import java.net.ConnectException
 import java.net.HttpURLConnection
 import java.net.NoRouteToHostException
@@ -19,7 +21,7 @@ class UrlConnectionTransport : HttpTransport {
             configure(connection, request)
             val status = connection.responseCode
             val stream = if (status >= 400) connection.errorStream else connection.inputStream
-            val body = stream?.use { it.readBytes() } ?: ByteArray(0)
+            val body = stream?.use { readCapped(it) } ?: ByteArray(0)
             val headers = connection.headerFields
                 .filterKeys { it != null }
                 .mapKeys { it.key.lowercase() }
@@ -33,6 +35,29 @@ class UrlConnectionTransport : HttpTransport {
     }
 
     companion object {
+        // The feed is a few kilobytes. A captive portal can answer 200 with a large page, and
+        // reading it whole could end in OutOfMemoryError, a crash instead of "Unavailable".
+        const val MAX_BODY_BYTES = 256 * 1024
+
+        // A manual loop: InputStream.readNBytes needs API 33, and minSdk is 26.
+        fun readCapped(stream: InputStream): ByteArray {
+            val buffer = ByteArrayOutputStream()
+            val chunk = ByteArray(8 * 1024)
+            while (buffer.size() <= MAX_BODY_BYTES) {
+                val read = stream.read(chunk)
+                if (read < 0) break
+                buffer.write(chunk, 0, read)
+            }
+            val bytes = buffer.toByteArray()
+            if (bytes.size > MAX_BODY_BYTES) {
+                throw ProviderFailure.Undecodable(
+                    bytes.copyOf(240).decodeToString(),
+                    IOException("response body exceeds $MAX_BODY_BYTES bytes"),
+                )
+            }
+            return bytes
+        }
+
         // REQ-REFRESH-003's four transient kinds, in Java terms. ConnectException and
         // NoRouteToHostException are SocketExceptions, so they are matched before the general case.
         // Android throws UnknownHostException for a device with no network too.
