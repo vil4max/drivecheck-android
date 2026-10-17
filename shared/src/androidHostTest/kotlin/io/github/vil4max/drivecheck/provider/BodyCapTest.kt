@@ -16,4 +16,13 @@ class BodyCapTest {
             UrlConnectionTransport.readCapped(ByteArrayInputStream(ByteArray(cap + 1)))
         }
     }
+
+    @Test
+    fun REQ_REFRESH_005_an_error_body_over_the_cap_is_truncated_so_a_429_still_backs_off() {
+        val cap = UrlConnectionTransport.MAX_BODY_BYTES
+
+        val body = UrlConnectionTransport.readCapped(ByteArrayInputStream(ByteArray(cap * 2)), truncate = true)
+
+        assertContentEquals(ByteArray(cap), body)
+    }
 }
