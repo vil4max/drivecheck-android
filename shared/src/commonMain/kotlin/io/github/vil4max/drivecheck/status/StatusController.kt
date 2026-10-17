@@ -75,16 +75,20 @@ class StatusController(
     private val gate = FetchGate(rateLimitedUntil = store.loadRateLimitedUntil())
     private var inFlight: Job? = null
     private var polling: Job? = null
-    private var isSurfaceStarted = false
+    // The phone and the car are counted: one timer runs while any of them is started, as the
+    // iOS timer is shared between CarPlay and the phone (REQ-REFRESH-002).
+    private var startedSurfaces = 0
+    private val isSurfaceStarted get() = startedSurfaces > 0
 
     fun onSurfaceStarted() {
-        isSurfaceStarted = true
+        startedSurfaces += 1
         trigger()
         startPolling()
     }
 
     fun onSurfaceStopped() {
-        isSurfaceStarted = false
+        startedSurfaces = maxOf(0, startedSurfaces - 1)
+        if (isSurfaceStarted) return
         polling?.cancel()
         polling = null
     }

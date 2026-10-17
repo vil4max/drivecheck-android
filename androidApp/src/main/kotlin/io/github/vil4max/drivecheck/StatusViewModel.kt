@@ -8,12 +8,10 @@ import io.github.vil4max.drivecheck.map.MapController
 import io.github.vil4max.drivecheck.map.MapState
 import io.github.vil4max.drivecheck.provider.UbillingClient
 import io.github.vil4max.drivecheck.provider.UrlConnectionTransport
-import io.github.vil4max.drivecheck.refresh.AndroidRefreshEnvironment
 import io.github.vil4max.drivecheck.region.PlatformGeocoder
 import io.github.vil4max.drivecheck.region.PlatformLocationSource
 import io.github.vil4max.drivecheck.region.RegionCoordinator
 import io.github.vil4max.drivecheck.region.RegionTracker
-import io.github.vil4max.drivecheck.status.StatusController
 import io.github.vil4max.drivecheck.status.StatusPresentation
 import io.github.vil4max.drivecheck.status.StatusPresenter
 import io.github.vil4max.drivecheck.store.PreferencesStatusStore
@@ -48,13 +46,7 @@ data class StatusScreenState(
 class StatusViewModel(application: Application) : AndroidViewModel(application) {
     private val store = PreferencesStatusStore(application)
     private val location = PlatformLocationSource(application)
-    private val controller = StatusController(
-        provider = AppGraph.client,
-        clock = Clock.System,
-        scope = viewModelScope,
-        store = store,
-        environment = AndroidRefreshEnvironment(application)::read,
-    )
+    private val controller = AppGraph.controller(application)
     private val coordinator = RegionCoordinator(
         tracker = RegionTracker(PlatformGeocoder(application), Clock.System),
         controller = controller,
