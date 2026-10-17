@@ -337,6 +337,10 @@ Differs from iOS: iOS states this on the Details tab. This feature has one scree
 test on Google Play starts with this build, so testers see the provider's warning from the first
 install.
 
+Look (owner, 2026-10-17): the Status screen uses the iOS app's palette and, like it, is dark only;
+status colours are never themed, and there is no wallpaper-based dynamic colour. The colour only
+repeats what the title says.
+
 ## Key entities
 
 - `AlertRegion`: the 25 app regions, each with its Ubilling key.
