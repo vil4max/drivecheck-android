@@ -1,0 +1,28 @@
+# Gradle and Kotlin
+.gradle/
+build/
+.kotlin/
+local.properties
+
+# Android Studio and IntelliJ
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Xcode output of the shared module's iOS targets
+*.xcframework/
+DerivedData/
+
+# macOS
+.DS_Store
+
+# Agent runtime state and local markers
+.agents/
+.claude/settings.local.json
+
+# Signing material never enters the repository
+*.jks
+*.keystore
+keystore.properties
