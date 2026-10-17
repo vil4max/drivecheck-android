@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tab_status">Статус</string>
+    <string name="tab_details">Деталі</string>
+    <string name="map_loading">Завантаження карти…</string>
+    <string name="map_error">Не вдалося завантажити карту.</string>
+    <string name="map_refresh">Оновити карту</string>
+    <string name="map_caption">%1$d із %2$d регіонів під тривогою · %3$s</string>
+    <string name="age_minutes">%1$d хв тому</string>
+    <string name="map_a11y_alarm">Карта тривог. Регіони в тривозі (%1$d): %2$s</string>
+    <string name="map_a11y_clear">Карта тривог. У всіх регіонах спокійно.</string>
+    <string name="map_open_regions_hint">Відкриває список регіонів</string>
+    <string name="regions_title">Регіони</string>
+    <string name="regions_current">Поточний регіон</string>
+    <string name="regions_section_alarm">Тривога · %1$d</string>
+    <string name="regions_section_other">Інші регіони</string>
+    <string name="regions_row_current">поточний</string>
+    <string name="back">Назад</string>
+    <string name="details_title">Деталі</string>
+    <string name="summary_title">Зведення</string>
+    <string name="source_label">Джерело:</string>
+    <string name="source_external">Зовнішнє джерело</string>
+    <string name="summary_region_quiet">У вибраному регіоні зараз немає повітряної тривоги.</string>
+    <string name="summary_region_alarm">У вибраному регіоні зараз оголошено повітряну тривогу.</string>
+    <string name="summary_region_format">%1$s: %2$s</string>
+    <string name="summary_explanation_unknown">Статус зараз недоступний.</string>
+    <string name="summary_explanation_region_unavailable">Цього регіону немає в останній стрічці тривог.</string>
+    <string name="summary_explanation_updating">Зараз оновлюємо дані…</string>
+    <string name="summary_nearby">Будьте уважні: поруч оголошено повітряну тривогу — %1$s.</string>
+    <string name="summary_nearby_more">Будьте уважні: поруч оголошено повітряну тривогу — %1$s і ще %2$d.</string>
+    <string name="summary_alerts_active">Повітряну тривогу оголошено у %1$d із %2$d регіонів України.</string>
+    <string name="summary_all_clear">Повітряну тривогу не оголошено в жодному з %1$d регіонів України.</string>
+    <plurals name="summary_partial_clear">
+        <item quantity="one">У %1$d регіоні, щодо якого є дані, повітряної тривоги немає.</item>
+        <item quantity="few">У %1$d регіонах, щодо яких є дані, повітряної тривоги немає.</item>
+        <item quantity="many">У %1$d регіонах, щодо яких є дані, повітряної тривоги немає.</item>
+        <item quantity="other">У %1$d регіонах, щодо яких є дані, повітряної тривоги немає.</item>
+    </plurals>
+    <string name="summary_no_data">Дані про повітряну тривогу в регіонах України зараз недоступні.</string>
+    <string name="summary_stale">Дані можуть бути застарілими</string>
+    <string name="details_section_location">ГЕОЛОКАЦІЯ</string>
+    <string name="details_section_data">ДАНІ</string>
+    <string name="details_source_link">Джерело даних (Ubilling)</string>
+    <string name="details_version">Версія %1$s (%2$d)</string>
+</resources>

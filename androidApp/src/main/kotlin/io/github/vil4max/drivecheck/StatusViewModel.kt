@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.vil4max.drivecheck.domain.AlertRegion
+import io.github.vil4max.drivecheck.map.MapController
+import io.github.vil4max.drivecheck.map.MapState
 import io.github.vil4max.drivecheck.provider.AndroidProviderLog
 import io.github.vil4max.drivecheck.provider.UbillingClient
 import io.github.vil4max.drivecheck.provider.UrlConnectionTransport
@@ -60,8 +62,12 @@ class StatusViewModel(application: Application) : AndroidViewModel(application) 
         scope = viewModelScope,
     )
     private val isStarted = MutableStateFlow(false)
+    private val map = MapController(UrlConnectionTransport(), Clock.System, viewModelScope, UbillingClient.userAgent(BuildConfig.VERSION_NAME))
+    val mapState: StateFlow<MapState> = map.state
 
     init {
+        // REQ-ANDROID-002: the map waits until the status has settled after the session's start.
+        controller.isChecking.onEach { checking -> if (!checking && isStarted.value) map.onStatusSettled() }.launchIn(viewModelScope)
         // Location runs only while the app is on screen and the coordinator allows it.
         combine(isStarted, coordinator.shouldTrackLocation) { started, allowed -> started && allowed }
             .flatMapLatest { track -> if (track) location.fixes() else emptyFlow() }
@@ -104,7 +110,9 @@ class StatusViewModel(application: Application) : AndroidViewModel(application) 
 
     fun onScreenStarted() {
         isStarted.value = true
+        map.onNewSession()
         controller.onSurfaceStarted()
+        if (!controller.isChecking.value) map.onStatusSettled()
         // Coming back from the system settings may have changed the answer.
         if (coordinator.isLocationDenied.value && location.hasPermission()) onPermissionResult()
     }
@@ -115,6 +123,14 @@ class StatusViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun refresh() = controller.refresh()
+
+    fun onMapShown() = map.onCardShown()
+
+    fun retryMap() = map.retry()
+
+    fun snapshot() = controller.snapshot.value
+
+    fun statusState() = controller.state.value
 
     fun completeOnboarding() = coordinator.completeOnboarding()
 

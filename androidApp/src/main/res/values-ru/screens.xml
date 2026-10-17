@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tab_status">Статус</string>
+    <string name="tab_details">Детали</string>
+    <string name="map_loading">Загрузка карты…</string>
+    <string name="map_error">Не удалось загрузить карту.</string>
+    <string name="map_refresh">Обновить карту</string>
+    <string name="map_caption">%1$d из %2$d регионов под тревогой · %3$s</string>
+    <string name="age_minutes">%1$d мин назад</string>
+    <string name="map_a11y_alarm">Карта тревог. Регионы в тревоге (%1$d): %2$s</string>
+    <string name="map_a11y_clear">Карта тревог. Во всех регионах спокойно.</string>
+    <string name="map_open_regions_hint">Открывает список регионов</string>
+    <string name="regions_title">Регионы</string>
+    <string name="regions_current">Текущий регион</string>
+    <string name="regions_section_alarm">Тревога · %1$d</string>
+    <string name="regions_section_other">Остальные регионы</string>
+    <string name="regions_row_current">текущий</string>
+    <string name="back">Назад</string>
+    <string name="details_title">Детали</string>
+    <string name="summary_title">Сводка</string>
+    <string name="source_label">Источник:</string>
+    <string name="source_external">Внешний источник</string>
+    <string name="summary_region_quiet">В выбранном регионе сейчас нет воздушной тревоги.</string>
+    <string name="summary_region_alarm">В выбранном регионе сейчас объявлена воздушная тревога.</string>
+    <string name="summary_region_format">%1$s: %2$s</string>
+    <string name="summary_explanation_unknown">Статус сейчас недоступен.</string>
+    <string name="summary_explanation_region_unavailable">Этого региона нет в последней сводке тревог.</string>
+    <string name="summary_explanation_updating">Сейчас обновляем данные…</string>
+    <string name="summary_nearby">Будьте внимательны: рядом объявлена воздушная тревога — %1$s.</string>
+    <string name="summary_nearby_more">Будьте внимательны: рядом объявлена воздушная тревога — %1$s и ещё %2$d.</string>
+    <string name="summary_alerts_active">Воздушная тревога объявлена в %1$d из %2$d регионов Украины.</string>
+    <string name="summary_all_clear">Воздушная тревога не объявлена ни в одном из %1$d регионов Украины.</string>
+    <plurals name="summary_partial_clear">
+        <item quantity="one">В %1$d регионе, по которому есть данные, воздушной тревоги нет.</item>
+        <item quantity="few">В %1$d регионах, по которым есть данные, воздушной тревоги нет.</item>
+        <item quantity="many">В %1$d регионах, по которым есть данные, воздушной тревоги нет.</item>
+        <item quantity="other">В %1$d регионах, по которым есть данные, воздушной тревоги нет.</item>
+    </plurals>
+    <string name="summary_no_data">Данные о воздушной тревоге в регионах Украины сейчас недоступны.</string>
+    <string name="summary_stale">Данные могут быть устаревшими</string>
+    <string name="details_section_location">ГЕОЛОКАЦИЯ</string>
+    <string name="details_section_data">ДАННЫЕ</string>
+    <string name="details_source_link">Источник данных (Ubilling)</string>
+    <string name="details_version">Версия %1$s (%2$d)</string>
+</resources>

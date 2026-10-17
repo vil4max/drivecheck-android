@@ -2,12 +2,14 @@ package io.github.vil4max.drivecheck
 
 import android.Manifest
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,14 +25,27 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.vil4max.drivecheck.domain.AlertRegion
+import io.github.vil4max.drivecheck.domain.AlertStatus
+import io.github.vil4max.drivecheck.map.MapCaption
+import io.github.vil4max.drivecheck.map.MapState
+import io.github.vil4max.drivecheck.status.DetailsSummary
+import io.github.vil4max.drivecheck.status.RegionList
 import io.github.vil4max.drivecheck.theme.DriveCheckColors
 import io.github.vil4max.drivecheck.theme.DriveCheckTheme
+import kotlin.time.Clock
 
 class MainActivity : ComponentActivity() {
     private val viewModel: StatusViewModel by viewModels()
@@ -44,7 +59,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             DriveCheckTheme {
                 Surface {
-                    AppRoot(viewModel, onOpenSettings = ::openAppSettings)
+                    AppRoot(viewModel, onOpenSettings = ::openAppSettings, onOpenSource = ::openSource)
                 }
             }
         }
@@ -53,12 +68,19 @@ class MainActivity : ComponentActivity() {
     private fun openAppSettings() {
         startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null)))
     }
+
+    private fun openSource() {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wiki.ubilling.net.ua/doku.php?id=aerialalertsapi")))
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AppRoot(viewModel: StatusViewModel, onOpenSettings: () -> Unit) {
+private fun AppRoot(viewModel: StatusViewModel, onOpenSettings: () -> Unit, onOpenSource: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val mapState by viewModel.mapState.collectAsStateWithLifecycle()
+    var tab by rememberSaveable { mutableStateOf(Tab.Status) }
+    var showRegions by rememberSaveable { mutableStateOf(false) }
     val permissions = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         viewModel.onPermissionResult()
     }
@@ -83,13 +105,52 @@ private fun AppRoot(viewModel: StatusViewModel, onOpenSettings: () -> Unit) {
         return
     }
 
+    val snapshot = viewModel.snapshot()
+    val alarms = AlertRegion.entries.filter { snapshot?.status(it) == AlertStatus.Alarm }
+    val resources = LocalResources.current
+
+    BackHandler(enabled = showRegions) { showRegions = false }
+
     Box(Modifier.fillMaxSize()) {
-        StatusScreen(viewModel, onOpenSettings)
+        when {
+            showRegions -> RegionList.of(snapshot, state.region) { resources.getString(it.nameRes()) }
+                ?.let { RegionListScreen(it, onBack = { showRegions = false }) }
+            tab == Tab.Status -> StatusContent(
+                presentation = state.presentation,
+                regionName = stringResource(state.region.nameRes()),
+                isChecking = state.isChecking,
+                onRefresh = viewModel::refresh,
+                locationDenied = state.isLocationDenied,
+                onOpenSettings = onOpenSettings,
+                map = { modifier ->
+                    LaunchedEffect(Unit) { viewModel.onMapShown() }
+                    MapCard(
+                        state = mapState.toCard(alarms),
+                        onOpen = { if (snapshot != null) showRegions = true },
+                        onRetry = viewModel::retryMap,
+                        modifier = modifier,
+                    )
+                },
+            )
+            else -> DetailsScreen(
+                lines = DetailsSummary.lines(viewModel.statusState(), snapshot, state.region, state.presentation.isStale),
+                countryStatuses = if (snapshot == null) emptyList() else AlertRegion.entries.map { snapshot.status(it) },
+                alertRegions = alarms,
+                locationDenied = state.isLocationDenied,
+                onOpenSettings = onOpenSettings,
+                onOpenSource = onOpenSource,
+                versionName = BuildConfig.VERSION_NAME,
+                versionCode = BuildConfig.VERSION_CODE,
+            )
+        }
+        Box(Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(bottom = 12.dp)) {
+            TabBar(selected = tab, onSelect = { tab = it; showRegions = false })
+        }
         state.notice?.let { region ->
             RegionChangedNotice(
                 regionName = stringResource(region.nameRes()),
                 onDismiss = viewModel::dismissNotice,
-                modifier = Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(bottom = 16.dp),
+                modifier = Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(bottom = 104.dp),
             )
         }
     }
@@ -99,4 +160,18 @@ private fun AppRoot(viewModel: StatusViewModel, onOpenSettings: () -> Unit) {
             OutsideUkraineContent(onGotIt = viewModel::dismissOutsideSheet)
         }
     }
+}
+
+@Composable
+private fun MapState.toCard(alarms: List<AlertRegion>): MapCardState = when (this) {
+    is MapState.Loaded -> {
+        val image = remember(this) { BitmapFactory.decodeByteArray(image, 0, image.size)?.asImageBitmap() }
+        if (image == null) {
+            MapCardState.Failed
+        } else {
+            MapCardState.Loaded(image, alarms, MapCaption.of(alarms.size, fetchedAt, Clock.System.now()).minutes)
+        }
+    }
+    MapState.Failed -> MapCardState.Failed
+    else -> MapCardState.Loading
 }

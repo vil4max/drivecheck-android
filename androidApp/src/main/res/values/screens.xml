@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tabs, map, region list and Details, as in the iOS catalogs. -->
+<resources>
+    <string name="tab_status">Status</string>
+    <string name="tab_details">Details</string>
+    <string name="map_loading">Loading map…</string>
+    <string name="map_error">Couldn\'t load the map.</string>
+    <string name="map_refresh">Refresh map</string>
+    <string name="map_caption">%1$d of %2$d regions under alert · %3$s</string>
+    <string name="age_minutes">%1$d min ago</string>
+    <string name="map_a11y_alarm">Alert map. Regions in alert (%1$d): %2$s</string>
+    <string name="map_a11y_clear">Alert map. All regions clear.</string>
+    <string name="map_open_regions_hint">Opens the list of regions</string>
+    <string name="regions_title">Regions</string>
+    <string name="regions_current">Current region</string>
+    <string name="regions_section_alarm">Alert Active · %1$d</string>
+    <string name="regions_section_other">Other regions</string>
+    <string name="regions_row_current">current</string>
+    <string name="back">Back</string>
+    <string name="details_title">Details</string>
+    <string name="summary_title">Summary</string>
+    <string name="source_label">Source:</string>
+    <string name="source_external">External feed</string>
+    <string name="summary_region_quiet">There is currently no air raid alert in the selected region.</string>
+    <string name="summary_region_alarm">An air raid alert is currently active in the selected region.</string>
+    <string name="summary_region_format">%1$s: %2$s</string>
+    <string name="summary_explanation_unknown">Status unavailable right now.</string>
+    <string name="summary_explanation_region_unavailable">This region is missing from the latest alert feed.</string>
+    <string name="summary_explanation_updating">Updating the latest status…</string>
+    <string name="summary_nearby">Be careful: a nearby air raid alert is active — %1$s.</string>
+    <string name="summary_nearby_more">Be careful: nearby air raid alerts are active — %1$s and %2$d more.</string>
+    <string name="summary_alerts_active">Air raid alerts are active in %1$d of %2$d regions in Ukraine.</string>
+    <string name="summary_all_clear">No air raid alerts are active in any of Ukraine’s %1$d regions.</string>
+    <plurals name="summary_partial_clear">
+        <item quantity="one">No air raid alerts are active in the %1$d region reporting data.</item>
+        <item quantity="other">No air raid alerts are active in the %1$d regions reporting data.</item>
+    </plurals>
+    <string name="summary_no_data">Country-wide air raid alert data is currently unavailable.</string>
+    <string name="summary_stale">Data may be outdated</string>
+    <string name="details_section_location">LOCATION</string>
+    <string name="details_section_data">DATA</string>
+    <string name="details_source_link">Data source (Ubilling)</string>
+    <string name="details_version">Version %1$s (%2$d)</string>
+</resources>

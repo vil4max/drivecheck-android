@@ -4,6 +4,8 @@ import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,27 +37,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.LifecycleStartEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vil4max.drivecheck.status.DisplayPhase
 import io.github.vil4max.drivecheck.status.StatusPresentation
 import io.github.vil4max.drivecheck.theme.DriveCheckColors
 import java.util.Date
 import kotlin.time.Instant
-
-@Composable
-fun StatusScreen(viewModel: StatusViewModel, onOpenSettings: () -> Unit) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-    StatusContent(
-        presentation = state.presentation,
-        regionName = stringResource(state.region.nameRes()),
-        isChecking = state.isChecking,
-        onRefresh = viewModel::refresh,
-        locationDenied = state.isLocationDenied,
-        onOpenSettings = onOpenSettings,
-    )
-}
 
 // The iOS Status tab: title, hero, coloured status word, region with its update time, the nearby
 // card. Pull to refresh is the gesture (as on the iPhone); TalkBack gets a Refresh action on the hero.
@@ -69,10 +54,12 @@ fun StatusContent(
     onRefresh: () -> Unit,
     locationDenied: Boolean = false,
     onOpenSettings: () -> Unit = {},
-    belowNearby: @Composable () -> Unit = {},
+    map: (@Composable (Modifier) -> Unit)? = null,
 ) {
     val refreshLabel = stringResource(R.string.action_refresh)
     PullToRefreshBox(isRefreshing = isChecking, onRefresh = onRefresh, modifier = Modifier.fillMaxSize()) {
+      BoxWithConstraints(Modifier.fillMaxSize()) {
+        val layout = StatusLayout.of(maxWidth, maxHeight, hasMap = map != null, hasNearby = presentation.nearbyAlerts.isNotEmpty())
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -94,7 +81,7 @@ fun StatusContent(
                     customActions = listOf(CustomAccessibilityAction(refreshLabel) { onRefresh(); true })
                 },
             ) {
-                StatusHero(presentation.phase, Modifier.padding(top = 8.dp))
+                StatusHero(presentation.phase, Modifier.padding(top = 8.dp), size = layout.heroSize)
                 Text(
                     text = stringResource(presentation.phase.titleRes()),
                     color = presentation.phase.color(),
@@ -137,8 +124,36 @@ fun StatusContent(
                 Spacer(Modifier.height(20.dp))
                 LocationDeniedCard(onOpenSettings)
             }
-            belowNearby()
-            Spacer(Modifier.height(24.dp))
+            if (map != null) {
+                Spacer(Modifier.height(20.dp))
+                map(Modifier.width(layout.mapWidth))
+            }
+            Spacer(Modifier.height(if (map != null) 112.dp else 24.dp))
+        }
+      }
+    }
+}
+
+// REQ-SURF-013: when everything does not fit, the hero takes its compact size first, then the map
+// narrows (centred) to the height left, down to a minimum width, below which it keeps the full
+// width and the page scrolls.
+data class StatusLayout(val heroSize: Dp, val mapWidth: Dp) {
+    companion object {
+        val FULL_HERO = 200.dp
+        val COMPACT_HERO = 140.dp
+        val MIN_MAP_WIDTH = 240.dp
+        private const val MAP_RATIO = 670f / 1000f
+
+        fun of(width: Dp, height: Dp, hasMap: Boolean, hasNearby: Boolean): StatusLayout {
+            val fullMap = width - 40.dp
+            if (!hasMap) return StatusLayout(FULL_HERO, fullMap)
+            // Title, status word, region, meta, spacings and the tab bar; the nearby card when shown.
+            val fixed = 220.dp + (if (hasNearby) 100.dp else 0.dp) + 112.dp
+            val mapHeight = fullMap * MAP_RATIO
+            if (fixed + FULL_HERO + mapHeight <= height) return StatusLayout(FULL_HERO, fullMap)
+            if (fixed + COMPACT_HERO + mapHeight <= height) return StatusLayout(COMPACT_HERO, fullMap)
+            val fitted = (height - fixed - COMPACT_HERO) / MAP_RATIO
+            return if (fitted >= MIN_MAP_WIDTH) StatusLayout(COMPACT_HERO, fitted) else StatusLayout(COMPACT_HERO, fullMap)
         }
     }
 }
