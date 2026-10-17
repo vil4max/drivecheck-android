@@ -55,7 +55,10 @@ class DriveCheckCarSession(
                     controller.startRefreshCycle()
                 }
 
-                override fun onStop(owner: LifecycleOwner) = controller.onSurfaceStopped()
+                override fun onStop(owner: LifecycleOwner) {
+                    controller.cancelRefreshCycle()
+                    controller.onSurfaceStopped()
+                }
             },
         )
         // Staleness depends on time passing, as on the phone.

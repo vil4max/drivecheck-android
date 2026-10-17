@@ -123,6 +123,12 @@ class StatusController(
         }
     }
 
+    // The car ends its cycle when it disconnects, even while the phone keeps the timer running.
+    fun cancelRefreshCycle() {
+        cycle?.cancel()
+        cycle = null
+    }
+
     private enum class Attempt { Answered, Failed, Held }
 
     private suspend fun attemptAndWait(): Attempt {

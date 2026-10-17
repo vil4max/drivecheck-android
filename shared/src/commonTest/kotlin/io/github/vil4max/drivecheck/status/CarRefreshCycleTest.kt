@@ -9,6 +9,7 @@ import io.github.vil4max.drivecheck.provider.AlertsProvider
 import io.github.vil4max.drivecheck.provider.ProviderFailure
 import io.github.vil4max.drivecheck.provider.TransportFailure
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -86,19 +87,25 @@ class CarRefreshCycleTest {
 
     @Test
     fun REQ_REFRESH_004_a_new_cycle_supersedes_the_old_one() = runTest {
+        // Each request takes 1 s, so the two cycles' attempts fall on different moments and a
+        // cycle left running would add a request of its own.
         val provider = provider { throw lost }
-        val controller = started(provider)
+        val slow = AlertsProvider {
+            delay(1.seconds)
+            provider.fetchAlerts()
+        }
+        val controller = started(slow)
 
         controller.startRefreshCycle()
-        advanceTimeBy(3.seconds)
+        advanceTimeBy(3_500.milliseconds)
         runCurrent()
         controller.startRefreshCycle()
         advanceTimeBy(30.seconds)
         runCurrent()
 
-        // Old cycle: 0 and 2 s. The new one starts at 3 s, held by the 2 s gap until it may run,
-        // then 2 s and 4 s later; the old cycle's 6 s attempt never comes.
-        assertEquals(3, provider.callTimes.count { it >= 3_000L }, "times: ${provider.callTimes}")
-        assertEquals(5, provider.callTimes.size, "times: ${provider.callTimes}")
+        // Requests start at 0 s and 3 s (old cycle), then 6 s and 11 s (the new one joins the 3 s
+        // request and backs off 2 s, then 4 s, after each failure ends); each is recorded as it
+        // ends, 1 s later. The old cycle's 8 s attempt never comes.
+        assertEquals(listOf(1_000L, 4_000L, 7_000L, 12_000L), provider.callTimes)
     }
 }

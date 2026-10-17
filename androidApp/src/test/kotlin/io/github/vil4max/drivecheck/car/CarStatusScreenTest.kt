@@ -107,6 +107,12 @@ class CarStatusScreenTest {
     }
 
     @Test
+    fun REQ_SURF_006_the_first_check_says_checking_once() {
+        val first = CarStatus(StatusPresentation(DisplayPhase.Checking, null, false, emptyList()), AlertRegion.Kharkiv, isChecking = true, isLocationDenied = false)
+        assertEquals(listOf("Status", "Checking…", "Kharkiv Oblast"), template(first).rows()[0])
+    }
+
+    @Test
     fun REQ_SURF_006_a_new_status_redraws_the_screen() {
         val flow = MutableStateFlow(status(DisplayPhase.NoAlert))
         val controller = ScreenController(CarStatusScreen(carContext, flow) {})
@@ -146,5 +152,28 @@ class CarStatusScreenTest {
         session.moveToState(Lifecycle.State.CREATED)
         looper.idleFor(Duration.ofSeconds(30))
         assertEquals(1, calls, "a stopped car stops its cycle and the timer")
+    }
+
+    @Test
+    fun REQ_REFRESH_004_a_disconnect_ends_the_cycle_while_the_phone_stays_open() {
+        var calls = 0
+        val failing = AlertsProvider {
+            calls += 1
+            throw TransportFailure(TransportFailure.Kind.ConnectionLost)
+        }
+        val looperClock = object : Clock {
+            override fun now() = Instant.fromEpochMilliseconds(android.os.SystemClock.uptimeMillis())
+        }
+        val controller = StatusController(failing, looperClock, CoroutineScope(SupervisorJob() + Dispatchers.Main))
+        controller.onSurfaceStarted(fetchNow = false)
+        val session = SessionController(DriveCheckCarSession { controller }, carContext, Intent())
+        val looper = shadowOf(Looper.getMainLooper())
+
+        session.moveToState(Lifecycle.State.STARTED)
+        looper.idle()
+        session.moveToState(Lifecycle.State.CREATED)
+        looper.idleFor(Duration.ofSeconds(30))
+
+        assertEquals(1, calls, "the phone's timer waits its 60 s; the car's retries stop with the car")
     }
 }
