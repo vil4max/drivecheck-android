@@ -21,7 +21,7 @@ class UrlConnectionTransport : HttpTransport {
             configure(connection, request)
             val status = connection.responseCode
             val stream = if (status >= 400) connection.errorStream else connection.inputStream
-            val body = stream?.use { readCapped(it) } ?: ByteArray(0)
+            val body = stream?.use { readCapped(it, truncate = status >= 400) } ?: ByteArray(0)
             val headers = connection.headerFields
                 .filterKeys { it != null }
                 .mapKeys { it.key.lowercase() }
@@ -40,7 +40,9 @@ class UrlConnectionTransport : HttpTransport {
         const val MAX_BODY_BYTES = 256 * 1024
 
         // A manual loop: InputStream.readNBytes needs API 33, and minSdk is 26.
-        fun readCapped(stream: InputStream): ByteArray {
+        // An error body is truncated, not refused, so a 429 with a large page still reaches the
+        // backoff (REQ-REFRESH-005).
+        fun readCapped(stream: InputStream, truncate: Boolean = false): ByteArray {
             val buffer = ByteArrayOutputStream()
             val chunk = ByteArray(8 * 1024)
             while (buffer.size() <= MAX_BODY_BYTES) {
@@ -49,6 +51,7 @@ class UrlConnectionTransport : HttpTransport {
                 buffer.write(chunk, 0, read)
             }
             val bytes = buffer.toByteArray()
+            if (bytes.size > MAX_BODY_BYTES && truncate) return bytes.copyOf(MAX_BODY_BYTES)
             if (bytes.size > MAX_BODY_BYTES) {
                 throw ProviderFailure.Undecodable(
                     bytes.copyOf(240).decodeToString(),
