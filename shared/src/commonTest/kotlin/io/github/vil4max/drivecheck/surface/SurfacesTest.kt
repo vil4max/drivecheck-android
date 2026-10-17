@@ -10,9 +10,13 @@ import io.github.vil4max.drivecheck.provider.ProviderFailure
 import io.github.vil4max.drivecheck.provider.TestClock
 import io.github.vil4max.drivecheck.provider.TransportFailure
 import io.github.vil4max.drivecheck.status.DisplayPhase
+import io.github.vil4max.drivecheck.status.StatusController
 import io.github.vil4max.drivecheck.store.InMemoryStatusStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -99,5 +103,27 @@ class SurfacesTest {
 
         val slow = BackgroundRefresh(AlertsProvider { awaitCancellation() }, InMemoryStatusStore(), clock)
         assertEquals(BackgroundOutcome.Failed, slow.run(isScheduled = false), "bounded at 8 s")
+    }
+
+    // The widget redraws from the store on each emission, so the store must already hold it.
+    @Test
+    fun REQ_REFRESH_009_a_fetch_and_a_region_are_saved_before_they_are_published() = runTest {
+        val store = InMemoryStatusStore()
+        val fetched = snapshot(0, AlertStatus.Alarm)
+        val controller = StatusController(AlertsProvider { fetched }, TestClock(now), backgroundScope, store = store)
+        val seen = mutableListOf<Boolean>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            controller.snapshot.collect { if (it != null) seen += store.loadSnapshot() == it }
+        }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            controller.region.collect { if (it == AlertRegion.Lviv) seen += store.loadRegion() == it }
+        }
+
+        controller.onSurfaceStarted()
+        runCurrent()
+        controller.selectRegion(AlertRegion.Lviv)
+        runCurrent()
+
+        assertEquals(listOf(true, true), seen)
     }
 }
