@@ -337,6 +337,23 @@ Differs from iOS: iOS states this on the Details tab. This feature has one scree
 test on Google Play starts with this build, so testers see the provider's warning from the first
 install.
 
+### REQ-ANDROID-001 — Requests at least 2 s apart, with Checking shown
+
+Status: approved (owner, 2026-10-17, review finding L2, answer «A»)
+
+Core: P2, P4
+
+Reason: REQ-PROVIDER-002. A button has none of pull to refresh's natural pace, and after a failure
+or a 429 the fetch floor (REQ-REFRESH-010) does not hold, so repeated taps could reach Ubilling's
+2 requests per second per host.
+
+Given the Status screen\
+When any trigger asks for a request\
+Then no request starts less than 2 s after the previous one started, whatever the outcome of that
+one; while a request runs, the Refresh button shows "Checking…" and takes no taps
+
+Differs from iOS: Android-only. iOS has no such minimum gap; its phone refresh is a pull.
+
 Look (owner, 2026-10-17): the Status screen uses the iOS app's palette and, like it, is dark only;
 status colours are never themed, and there is no wallpaper-based dynamic colour. The colour only
 repeats what the title says.
