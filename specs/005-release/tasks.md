@@ -9,4 +9,4 @@ Feature: `005-release` · One PR, one commit per group.
   screenshots, the release checklist (Data safety, content rating, declarations, closed test).
 - [x] T004 Group 3: no Android Auto in 1.0 (owner, 2026-10-17); spec 004 records why; spec 002
   T018 applied with `ReleaseCopyGuardTest`, and the listing check refuses a car screen promise.
-- [ ] T005 PR with the review packet; the owner's Play Console steps as one Russian list in chat.
+- [x] T005 PR with the review packet; the owner's Play Console steps as one Russian list in chat.
