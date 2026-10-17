@@ -46,11 +46,11 @@ fun StatusScreen(viewModel: StatusViewModel) {
         onStopOrDispose { viewModel.onScreenStopped() }
     }
 
-    StatusContent(state = state, onRefresh = viewModel::refresh)
+    StatusContent(state = state.status, isChecking = state.isChecking, onRefresh = viewModel::refresh)
 }
 
 @Composable
-fun StatusContent(state: StatusState, onRefresh: () -> Unit) {
+fun StatusContent(state: StatusState, isChecking: Boolean, onRefresh: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -83,11 +83,13 @@ fun StatusContent(state: StatusState, onRefresh: () -> Unit) {
             }
         }
         Spacer(Modifier.height(32.dp))
+        // REQ-ANDROID-001: while a request runs the button says so and takes no taps.
         Button(
             onClick = onRefresh,
+            enabled = !isChecking,
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
         ) {
-            Text(stringResource(R.string.action_refresh))
+            Text(stringResource(if (isChecking) R.string.status_checking else R.string.action_refresh))
         }
         Spacer(Modifier.height(24.dp))
         Text(

@@ -230,6 +230,59 @@ class StatusControllerTest {
     }
 
     @Test
+    fun REQ_ANDROID_001_requests_are_at_least_two_seconds_apart() = runTest {
+        val provider = ScriptedProvider(
+            listOf(
+                failure(TransportFailure(TransportFailure.Kind.Other)),
+                failure(ProviderFailure.RateLimited(clock.now + 30.seconds)),
+                answer(snapshot()),
+            ),
+        )
+        val controller = controller(provider)
+        controller.onSurfaceStarted()
+        runCurrent()
+
+        clock.now += 1.seconds
+        controller.refresh()
+        runCurrent()
+        assertEquals(1, provider.calls)
+
+        clock.now += 1.seconds
+        controller.refresh()
+        runCurrent()
+        assertEquals(2, provider.calls)
+
+        clock.now += 1.9.seconds
+        controller.refresh()
+        runCurrent()
+        assertEquals(2, provider.calls)
+
+        clock.now += 0.1.seconds
+        controller.refresh()
+        runCurrent()
+        assertEquals(3, provider.calls)
+    }
+
+    @Test
+    fun REQ_ANDROID_001_checking_is_shown_while_a_request_runs() = runTest {
+        val slow = CompletableDeferred<Unit>()
+        val provider = ScriptedProvider(
+            listOf({ slow.await(); throw TransportFailure(TransportFailure.Kind.Other) }),
+        )
+        val controller = controller(provider)
+        assertEquals(false, controller.isChecking.value)
+
+        controller.onSurfaceStarted()
+        runCurrent()
+        assertEquals(true, controller.isChecking.value)
+
+        slow.complete(Unit)
+        runCurrent()
+        assertEquals(false, controller.isChecking.value)
+        assertEquals(StatusState.Unavailable, controller.state.value)
+    }
+
+    @Test
     fun REQ_PROVIDER_002_a_trigger_during_a_request_joins_it() = runTest {
         val slow = CompletableDeferred<Unit>()
         val provider = ScriptedProvider(listOf({ slow.await(); snapshot(AlertStatus.Alarm) }))

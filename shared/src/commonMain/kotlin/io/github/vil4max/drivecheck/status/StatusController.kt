@@ -34,6 +34,9 @@ class StatusController(
     private val _state = MutableStateFlow<StatusState>(StatusState.Checking)
     val state: StateFlow<StatusState> = _state.asStateFlow()
 
+    private val _isChecking = MutableStateFlow(false)
+    val isChecking: StateFlow<Boolean> = _isChecking.asStateFlow()
+
     private val gate = FetchGate()
     private var snapshot: AlertsSnapshot? = null
     private var inFlight: Job? = null
@@ -58,7 +61,15 @@ class StatusController(
         if (!isSurfaceStarted) return
         if (inFlight?.isActive == true) return
         if (gate.isHeld(isScheduled, clock.now())) return
-        inFlight = scope.launch { fetch() }
+        gate.recordStart(clock.now())
+        _isChecking.value = true
+        inFlight = scope.launch {
+            try {
+                fetch()
+            } finally {
+                _isChecking.value = false
+            }
+        }
     }
 
     private suspend fun fetch() {
