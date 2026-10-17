@@ -40,7 +40,7 @@ What you get
 • A region that follows your location: nothing to pick or pin
 • Alerts in neighbouring regions, shown with your own status
 • The alert map as a reference image, loaded on demand and never on a timer; tap it for every region's status
-• An alert notification on the lock screen for the length of an alert, until the all-clear
+• A lock-screen notification while your region is under alert, once the app or the widget sees it, until the all-clear is seen. Not a push alert service
 • A home-screen widget with Refresh
 • A quick-settings tile
 
@@ -73,7 +73,7 @@ Drive Check відповідає на одне питання з одного п
 • Регіон за геолокацією: нічого не треба вибирати
 • Тривоги в сусідніх регіонах поруч із вашим статусом
 • Карта тривог як довідкове зображення: завантажується на вимогу, ніколи за таймером; торкніться її, щоб побачити статус усіх регіонів
-• Сповіщення на екрані блокування на час тривоги, до відбою
+• Сповіщення на екрані блокування, поки у вашому регіоні тривога: з'являється, коли застосунок або віджет її побачить, і тримається до відбою. Це не служба push-сповіщень
 • Віджет на головному екрані з кнопкою «Оновити»
 • Плитка у швидких налаштуваннях
 
@@ -106,7 +106,7 @@ Drive Check отвечает на один вопрос с одного взгл
 • Регион по геолокации: ничего не нужно выбирать
 • Тревоги в соседних регионах рядом с вашим статусом
 • Карта тревог как справочное изображение: загружается по запросу, никогда по таймеру; коснитесь её, чтобы увидеть статус всех регионов
-• Уведомление на экране блокировки на время тревоги, до отбоя
+• Уведомление на экране блокировки, пока в вашем регионе тревога: появляется, когда приложение или виджет её увидит, и держится до отбоя. Это не служба push-уведомлений
 • Виджет на главном экране с кнопкой «Обновить»
 • Плитка в быстрых настройках
 

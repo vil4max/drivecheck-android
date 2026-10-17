@@ -22,7 +22,7 @@ p, li { color: #333; }
 <p>Drive Check (“the App”) shows the air raid alert status of the region of Ukraine you are in. It is published on Google Play by vil4max.</p>
 
 <h2>Location</h2>
-<p>The App asks for your location only while it is open on screen, to find which region to show. It never asks for background location. To turn coordinates into a region, the App uses Android’s built-in geocoder, which may send the coordinates to the geocoding service of your device’s provider (on most devices, Google). The App itself never sends your location to the developer or to the alert data provider. If you do not allow location, the App shows Kyiv.</p>
+<p>The App asks for your location only while it is open on screen, to find which region to show. It never asks for background location. To turn coordinates into a region, the App uses Android’s built-in geocoder, which may send the coordinates to the geocoding service of your device’s provider (on most devices, Google). The App itself never sends your location to the developer or to the alert data provider. If you do not allow location, the App keeps the last region it found, or shows Kyiv if there is none.</p>
 
 <h2>Alert data</h2>
 <p>When you open the App, refresh it, or a widget or notification updates, the App requests the public alert status of all regions from the Ubilling aerial alerts service (ubilling.net.ua). The Status tab can also load the provider’s alert map image. These requests carry no personal data; like any web request, they reveal your IP address and an app identifier (“DriveCheck” and its version) to that service.</p>
@@ -31,7 +31,7 @@ p, li { color: #333; }
 <p>The alert notification, the home-screen widget and the quick-settings tile are created on your device from the same alert data. You can turn the notification off in the App’s Details tab or in Android settings.</p>
 
 <h2>What the App keeps</h2>
-<p>The App keeps the last alert data, your current region and its own settings on your device only. They are not backed up and are removed when you uninstall the App or clear its data.</p>
+<p>The App keeps the last alert data, your current region and its own settings on your device only. They are excluded from Android backups and from device-to-device transfer, and are removed when you uninstall the App or clear its data.</p>
 
 <h2>What the App does not do</h2>
 <ul>

@@ -8,6 +8,6 @@
     <string name="notification_channel">Повітряна тривога</string>
     <string name="details_section_notification">СПОВІЩЕННЯ</string>
     <string name="notification_switch">Сповіщення під час тривоги</string>
-    <string name="notification_switch_caption">Екран блокування і шторка сповіщень, до відбою</string>
+    <string name="notification_switch_caption">Коли застосунок або віджет бачить тривогу, до відбою. Не push-сповіщення</string>
     <string name="notifications_blocked">Сповіщення вимкнено в налаштуваннях Android</string>
 </resources>
