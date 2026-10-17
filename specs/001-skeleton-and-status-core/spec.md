@@ -171,6 +171,10 @@ Amended 2026-10-17 by spec 002: clause 1 gains the one shared periodic refresh (
 and the trigger list gains the inline map's first appearance in a foreground session
 (REQ-ANDROID-002).
 
+Amended 2026-10-17 by spec 003: the trigger list gains the widget's periodic update (30 min or
+longer, at the system's schedule, skipped inside a stored rate-limit window), the widget's Refresh
+button, and the notification's Refresh action.
+
 ### REQ-REFRESH-001 — Fetch only for an active surface
 
 Status: approved
