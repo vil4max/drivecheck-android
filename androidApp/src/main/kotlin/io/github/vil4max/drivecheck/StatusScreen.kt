@@ -90,7 +90,10 @@ fun StatusContent(
                     lineHeight = 46.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+                    modifier = Modifier.semantics(mergeDescendants = true) {
+                        liveRegion = LiveRegionMode.Polite
+                        customActions = listOf(CustomAccessibilityAction(refreshLabel) { onRefresh(); true })
+                    },
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {

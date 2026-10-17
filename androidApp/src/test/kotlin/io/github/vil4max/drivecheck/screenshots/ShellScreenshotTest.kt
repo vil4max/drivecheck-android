@@ -29,7 +29,7 @@ import io.github.vil4max.drivecheck.domain.AlertRegion.Cherkasy
 import io.github.vil4max.drivecheck.domain.AlertStatus
 import io.github.vil4max.drivecheck.domain.AlertsSnapshot
 import io.github.vil4max.drivecheck.nameRes
-import io.github.vil4max.drivecheck.regionNameOrder
+import io.github.vil4max.drivecheck.localizedRegionList
 import androidx.compose.ui.platform.LocalResources
 import io.github.vil4max.drivecheck.status.DetailsSummary
 import io.github.vil4max.drivecheck.status.DisplayPhase
@@ -118,15 +118,7 @@ class ShellScreenshotTest {
 
     // As the app builds it: localized names in the locale's alphabet order.
     @Composable
-    private fun localizedList(): RegionList {
-        val resources = LocalResources.current
-        return RegionList.of(
-            snapshot,
-            Cherkasy,
-            name = { resources.getString(it.nameRes()) },
-            comparator = regionNameOrder(resources.configuration.locales[0]),
-        )!!
-    }
+    private fun localizedList(): RegionList = localizedRegionList(snapshot, Cherkasy, LocalResources.current)!!
 
     @Test
     fun REQ_ANDROID_003_region_list() = capture("region_list", "en") { RegionListScreen(localizedList(), onBack = {}) }

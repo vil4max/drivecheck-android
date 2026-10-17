@@ -132,12 +132,8 @@ private fun AppRoot(viewModel: StatusViewModel, onOpenSettings: () -> Unit, onOp
 
     Box(Modifier.fillMaxSize()) {
         when {
-            showRegions -> RegionList.of(
-                snapshot,
-                state.region,
-                name = { resources.getString(it.nameRes()) },
-                comparator = regionNameOrder(resources.configuration.locales[0]),
-            )?.let { RegionListScreen(it, onBack = { showRegions = false }) }
+            showRegions -> localizedRegionList(snapshot, state.region, resources)
+                ?.let { RegionListScreen(it, onBack = { showRegions = false }) }
             tab == Tab.Status -> StatusContent(
                 presentation = state.presentation,
                 regionName = stringResource(state.region.nameRes()),

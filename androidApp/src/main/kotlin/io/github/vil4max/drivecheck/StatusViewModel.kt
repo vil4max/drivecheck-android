@@ -61,6 +61,7 @@ class StatusViewModel(application: Application) : AndroidViewModel(application) 
         controller = controller,
         store = store,
         scope = viewModelScope,
+        initiallyGranted = location.hasPermission(),
     )
     private val isStarted = MutableStateFlow(false)
     private val map = MapController(UrlConnectionTransport(), Clock.System, viewModelScope, UbillingClient.userAgent(BuildConfig.VERSION_NAME))
@@ -119,8 +120,9 @@ class StatusViewModel(application: Application) : AndroidViewModel(application) 
         stoppedForConfigurationChange = false
         controller.onSurfaceStarted()
         if (!controller.isChecking.value) map.onStatusSettled()
-        // Coming back from the system settings may have changed the answer.
-        if (coordinator.isLocationDenied.value && location.hasPermission()) onPermissionResult()
+        // Coming back from the system settings may have changed the answer, and a granted start
+        // learns whether the grant is precise or approximate.
+        if (location.hasPermission()) onPermissionResult()
     }
 
     fun onScreenStopped(isChangingConfigurations: Boolean = false) {
