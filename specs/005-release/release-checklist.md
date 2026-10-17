@@ -70,6 +70,7 @@ Assumption, to be checked by the owner against Play's definition of collection:
 | Health, financial features | None |
 | Foreground service | None |
 | Exact alarms | None: the timed redraw uses an inexact `AlarmManager.set` |
+| Android Auto | Add the Android Auto form factor (Release, Advanced settings, Form factors) and accept its terms; the car app is in the weather category and goes through the manual car review (spec 004) |
 | Notification permission | Asked only when the driver turns on the alert notification (Android 13+) |
 
 ## Closed test plan

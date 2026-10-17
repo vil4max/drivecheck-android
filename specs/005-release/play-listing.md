@@ -2,11 +2,11 @@
 
 Adapted from the iOS copy (`regional-check` `docs/operations/app-store-copy.md`, the 3.0 promotional
 text and the proposed English description), for what this build ships. The adaptations:
-- CarPlay becomes the Android surfaces this build has;
+- CarPlay becomes Android Auto;
 - the Live Activity becomes the alert notification;
 - Pro is dropped.
 
-No Android Auto claim appears: 1.0 ships no car screen ([spec 004](../004-android-auto/spec.md)).
+Android Auto is named because 1.0 ships its car screen ([spec 004](../004-android-auto/spec.md)); CarPlay and Android Automotive OS are never named.
 `scripts/listing-lengths.py` checks every field against Play's limits.
 
 ## Fields
@@ -37,6 +37,7 @@ Open the app, see whether your current region is under alert, and get back to th
 
 What you get
 • The current region's status, with the time it was checked
+• Android Auto: your region's status on the car screen, with Refresh
 • A region that follows your location: nothing to pick or pin
 • Alerts in neighbouring regions, shown with your own status
 • The alert map as a reference image, loaded on demand and never on a timer; tap it for every region's status
@@ -70,6 +71,7 @@ Drive Check відповідає на одне питання з одного п
 
 Що є
 • Статус вашого регіону і час перевірки
+• Android Auto: статус вашого регіону на екрані авто, з кнопкою «Оновити»
 • Регіон за геолокацією: нічого не треба вибирати
 • Тривоги в сусідніх регіонах поруч із вашим статусом
 • Карта тривог як довідкове зображення: завантажується на вимогу, ніколи за таймером; торкніться її, щоб побачити статус усіх регіонів
@@ -103,6 +105,7 @@ Drive Check отвечает на один вопрос с одного взгл
 
 Что есть
 • Статус вашего региона и время проверки
+• Android Auto: статус вашего региона на экране авто, с кнопкой «Обновить»
 • Регион по геолокации: ничего не нужно выбирать
 • Тревоги в соседних регионах рядом с вашим статусом
 • Карта тревог как справочное изображение: загружается по запросу, никогда по таймеру; коснитесь её, чтобы увидеть статус всех регионов

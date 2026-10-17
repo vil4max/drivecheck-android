@@ -10,12 +10,8 @@ import sys
 from pathlib import Path
 
 LIMITS = {"Short description": 80, "Full description": 4000}
-# The owner's decision of 2026-10-17 (spec 005): no car screen in 1.0, so no listing text names one.
-CAR_SURFACES = [
-    "Android Auto", "CarPlay", "Automotive",
-    "екрані авто", "в авто", "автомобіл", "машин",
-    "экране авто", "автомобил",
-]
+# Spec 004: 1.0 ships the Android Auto screen; CarPlay and Android Automotive OS are never shipped.
+CAR_SURFACES = ["CarPlay", "Automotive"]
 TITLE_LIMIT = 30
 LISTING = Path(__file__).resolve().parent.parent / "specs" / "005-release" / "play-listing.md"
 
@@ -42,7 +38,7 @@ def check(text: str) -> list[str]:
                 problems.append(f"{locale} {field}: {len(body)} > {LIMITS[field]}")
             for surface in CAR_SURFACES:
                 if surface.lower() in body.lower():
-                    problems.append(f"{locale} {field}: promises {surface}, which 1.0 does not ship")
+                    problems.append(f"{locale} {field}: promises {surface}, which this app does not ship")
     if found == 0:
         problems.append("no listing text found")
     title = re.search(r"^\| App name \| \d+ \| (.*?) \|$", text, flags=re.MULTILINE)

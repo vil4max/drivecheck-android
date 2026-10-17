@@ -30,15 +30,12 @@ class ListingLengthsTest(unittest.TestCase):
 
     def test_a_car_screen_promise_is_reported(self):
         self.assertEqual(
-            ["en-US Full description: promises Android Auto, which 1.0 does not ship"],
-            listing.check(page("x", "Works in android auto.")),
+            ["en-US Full description: promises CarPlay, which this app does not ship"],
+            listing.check(page("x", "Works in carplay.")),
         )
 
-    def test_a_ukrainian_car_screen_promise_is_reported(self):
-        self.assertEqual(
-            ["en-US Short description: promises екрані авто, which 1.0 does not ship"],
-            listing.check(page("Статус на екрані авто")),
-        )
+    def test_android_auto_may_be_named_because_it_ships(self):
+        self.assertEqual([], listing.check(page("Статус на екрані авто", "Android Auto: the car screen.")))
 
     def test_a_long_app_name_is_reported(self):
         self.assertEqual(["App name: 31 > 30"], listing.check(page("x", name="n" * 31)))

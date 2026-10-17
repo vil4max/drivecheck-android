@@ -23,16 +23,14 @@ The owner does every Play Console step himself; the answers and assets are in [r
 
 ## Android Auto
 
-Android Auto lists only apps in its supported categories. None of them fits an air-raid alert app:
-- the weather category requires weather content (quality guideline WE-1);
-- PC-1 forbids features outside the car app types.
+Android Auto ships in 1.0 (owner, 2026-10-17, through the orchestrator: «Android Auto доделать. Это
+мастхев функционал», which replaces his earlier «А»). The car screen is declared in the weather
+category, with the risk of a car-review rejection accepted; [spec 004](../004-android-auto/spec.md)
+holds the evidence.
 
-Decision (owner, 2026-10-17, through the orchestrator: «А»): no Android Auto in 1.0. The evidence
-and the condition for reopening are in [spec 004](../004-android-auto/spec.md).
-
-T018 of spec 002 is applied: the onboarding says what 1.0 ships, a glance from the home screen
-with the widget and the tile. `ReleaseCopyGuardTest` keeps every locale's strings free of a car
-screen promise, and `scripts/listing-lengths.py` does the same for the listing.
+The onboarding and the listing name Android Auto again. `ReleaseCopyGuardTest` allows that only
+while the manifest declares the car service, and it and `scripts/listing-lengths.py` refuse CarPlay
+and Android Automotive OS.
 
 ## Rules the listing follows
 
@@ -41,7 +39,7 @@ These come from the iOS copy rules:
 - The map is a reference image from the provider, never navigation.
 - The signal and the map are free on every surface.
 - Alert data is informational only; follow official instructions.
-- No promise of a surface this build does not ship.
+- No promise of a surface this build does not ship. A sideloaded APK shows no car screen (spec 004).
 
 ## Out of scope
 
