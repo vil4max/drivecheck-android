@@ -45,19 +45,16 @@ import java.util.Date
 import kotlin.time.Instant
 
 @Composable
-fun StatusScreen(viewModel: StatusViewModel) {
+fun StatusScreen(viewModel: StatusViewModel, onOpenSettings: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-
-    LifecycleStartEffect(viewModel) {
-        viewModel.onScreenStarted()
-        onStopOrDispose { viewModel.onScreenStopped() }
-    }
 
     StatusContent(
         presentation = state.presentation,
         regionName = stringResource(state.region.nameRes()),
         isChecking = state.isChecking,
         onRefresh = viewModel::refresh,
+        locationDenied = state.isLocationDenied,
+        onOpenSettings = onOpenSettings,
     )
 }
 
@@ -70,6 +67,8 @@ fun StatusContent(
     regionName: String,
     isChecking: Boolean,
     onRefresh: () -> Unit,
+    locationDenied: Boolean = false,
+    onOpenSettings: () -> Unit = {},
     belowNearby: @Composable () -> Unit = {},
 ) {
     val refreshLabel = stringResource(R.string.action_refresh)
@@ -133,6 +132,10 @@ fun StatusContent(
                     Spacer(Modifier.width(16.dp))
                     Text(nearby, fontSize = 19.sp, fontWeight = FontWeight.SemiBold)
                 }
+            }
+            if (locationDenied) {
+                Spacer(Modifier.height(20.dp))
+                LocationDeniedCard(onOpenSettings)
             }
             belowNearby()
             Spacer(Modifier.height(24.dp))

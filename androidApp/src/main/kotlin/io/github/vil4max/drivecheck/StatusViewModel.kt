@@ -8,29 +8,66 @@ import io.github.vil4max.drivecheck.provider.AndroidProviderLog
 import io.github.vil4max.drivecheck.provider.UbillingClient
 import io.github.vil4max.drivecheck.provider.UrlConnectionTransport
 import io.github.vil4max.drivecheck.refresh.AndroidRefreshEnvironment
+import io.github.vil4max.drivecheck.region.PlatformGeocoder
+import io.github.vil4max.drivecheck.region.PlatformLocationSource
+import io.github.vil4max.drivecheck.region.RegionCoordinator
+import io.github.vil4max.drivecheck.region.RegionTracker
 import io.github.vil4max.drivecheck.status.StatusController
 import io.github.vil4max.drivecheck.status.StatusPresentation
 import io.github.vil4max.drivecheck.status.StatusPresenter
 import io.github.vil4max.drivecheck.store.PreferencesStatusStore
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 
-data class StatusScreenState(val presentation: StatusPresentation, val region: AlertRegion, val isChecking: Boolean)
+data class StatusScreenState(
+    val presentation: StatusPresentation,
+    val region: AlertRegion,
+    val isChecking: Boolean,
+    val isOnboardingDone: Boolean = true,
+    val isLocationDenied: Boolean = false,
+    val notice: AlertRegion? = null,
+    val showOutsideSheet: Boolean = false,
+    val shouldRequestPermission: Boolean = false,
+)
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class StatusViewModel(application: Application) : AndroidViewModel(application) {
+    private val store = PreferencesStatusStore(application)
+    private val location = PlatformLocationSource(application)
     private val controller = StatusController(
         provider = client,
         clock = Clock.System,
         scope = viewModelScope,
-        store = PreferencesStatusStore(application),
+        store = store,
         environment = AndroidRefreshEnvironment(application)::read,
     )
+    private val coordinator = RegionCoordinator(
+        tracker = RegionTracker(PlatformGeocoder(application), Clock.System),
+        controller = controller,
+        store = store,
+        scope = viewModelScope,
+    )
+    private val isStarted = MutableStateFlow(false)
+
+    init {
+        // Location runs only while the app is on screen and the coordinator allows it.
+        combine(isStarted, coordinator.shouldTrackLocation) { started, allowed -> started && allowed }
+            .flatMapLatest { track -> if (track) location.fixes() else emptyFlow() }
+            .onEach(coordinator::onFix)
+            .launchIn(viewModelScope)
+    }
 
     // Staleness depends on time passing, so the presentation is recomputed on a slow tick too.
     private val tick = flow {
@@ -40,28 +77,54 @@ class StatusViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    private fun present(): StatusPresentation = StatusPresenter.present(
-        state = controller.state.value,
-        snapshot = controller.snapshot.value,
+    private fun current() = StatusScreenState(
+        presentation = StatusPresenter.present(
+            state = controller.state.value,
+            snapshot = controller.snapshot.value,
+            region = controller.region.value,
+            now = Clock.System.now(),
+            baseInterval = controller.baseInterval(),
+        ),
         region = controller.region.value,
-        now = Clock.System.now(),
-        baseInterval = controller.baseInterval(),
+        isChecking = controller.isChecking.value,
+        isOnboardingDone = coordinator.isOnboardingDone.value,
+        isLocationDenied = coordinator.isLocationDenied.value,
+        notice = coordinator.notice.value,
+        showOutsideSheet = coordinator.showOutsideSheet.value && coordinator.isOnboardingDone.value,
+        shouldRequestPermission = coordinator.shouldRequestPermission.value,
     )
 
-    val state: StateFlow<StatusScreenState> =
-        combine(controller.state, controller.snapshot, controller.isChecking, controller.region, tick) { _, _, isChecking, region, _ ->
-            StatusScreenState(present(), region, isChecking)
-        }.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000),
-            StatusScreenState(present(), controller.region.value, controller.isChecking.value),
-        )
+    val state: StateFlow<StatusScreenState> = combine(
+        listOf(
+            controller.state, controller.snapshot, controller.isChecking, controller.region, tick,
+            coordinator.isOnboardingDone, coordinator.isLocationDenied, coordinator.notice,
+            coordinator.showOutsideSheet, coordinator.shouldRequestPermission,
+        ),
+    ) { current() }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), current())
 
-    fun onScreenStarted() = controller.onSurfaceStarted()
+    fun onScreenStarted() {
+        isStarted.value = true
+        controller.onSurfaceStarted()
+        // Coming back from the system settings may have changed the answer.
+        if (coordinator.isLocationDenied.value && location.hasPermission()) onPermissionResult()
+    }
 
-    fun onScreenStopped() = controller.onSurfaceStopped()
+    fun onScreenStopped() {
+        isStarted.value = false
+        controller.onSurfaceStopped()
+    }
 
     fun refresh() = controller.refresh()
+
+    fun completeOnboarding() = coordinator.completeOnboarding()
+
+    fun hasLocationPermission() = location.hasPermission()
+
+    fun onPermissionResult() = coordinator.onPermission(location.hasPermission(), location.isPrecise())
+
+    fun dismissNotice() = coordinator.dismissNotice()
+
+    fun dismissOutsideSheet() = coordinator.dismissOutsideSheet()
 
     private companion object {
         // One client per process, so the unknown-key log and the 429 streak span every screen

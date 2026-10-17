@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_body">Статус тревоги в регионе.\nСделано для Android Auto.</string>
+    <string name="onboarding_car_title">Один взгляд в Android Auto</string>
+    <string name="onboarding_car_caption">Статус вашего региона на экране авто</string>
+    <string name="onboarding_location_title">Следует за вашей геолокацией</string>
+    <string name="onboarding_location_caption">Ничего не нужно выбирать</string>
+    <string name="onboarding_free_title">Статус тревоги — бесплатно</string>
+    <string name="onboarding_free_caption">Без аккаунта, без рекламы</string>
+    <string name="get_started">Начать</string>
+    <string name="outside_title">Вы за пределами Украины</string>
+    <string name="outside_body">Drive Check показывает тревоги для регионов Украины. Ваш последний регион остаётся выбранным, а если его не было — Киев.</string>
+    <string name="got_it">Понял</string>
+    <string name="region_changed">Регион изменён: %1$s</string>
+    <string name="close">Закрыть</string>
+    <string name="location_denied">Нет доступа к геолокации</string>
+    <string name="location_enable_tip">Включите геолокацию для более точного определения региона</string>
+    <string name="location_open_settings">Открыть Настройки</string>
+</resources>

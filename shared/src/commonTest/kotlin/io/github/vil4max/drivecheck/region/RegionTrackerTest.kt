@@ -43,6 +43,15 @@ class RegionTrackerTest {
     }
 
     @Test
+    fun REQ_REGION_005_approximate_access_accepts_fixes_up_to_5_km() = runTest {
+        val tracker = RegionTracker(geocoder({ ua("Київ", null) }), clock)
+        tracker.approximateOnly = true
+
+        assertEquals(RegionOutcome.Committed(AlertRegion.KyivCity), tracker.evaluate(fix(accuracy = 3000.0), AlertRegion.Lviv))
+        assertEquals(RegionOutcome.Ignored, tracker.evaluate(fix(accuracy = 5001.0), AlertRegion.KyivCity))
+    }
+
+    @Test
     fun REQ_REGION_005_a_settled_answer_needs_60_s_and_5_km_before_the_next_lookup() = runTest {
         val geocoder = geocoder({ ua("Київ", null) }, { ua("Бровари", "Київська область") })
         val tracker = RegionTracker(geocoder, clock)

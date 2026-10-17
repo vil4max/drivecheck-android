@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Onboarding, location and region notices, as in the iOS catalogs (CarPlay reads Android Auto). -->
+<resources>
+    <string name="onboarding_body">Regional alert status,\ndesigned for Android Auto.</string>
+    <string name="onboarding_car_title">One glance in Android Auto</string>
+    <string name="onboarding_car_caption">Your region\'s status on the car screen</string>
+    <string name="onboarding_location_title">Follows your location</string>
+    <string name="onboarding_location_caption">Nothing to pick or pin</string>
+    <string name="onboarding_free_title">Alert status is free</string>
+    <string name="onboarding_free_caption">No account, no ads</string>
+    <string name="get_started">Get Started</string>
+    <string name="outside_title">You\'re outside Ukraine</string>
+    <string name="outside_body">Drive Check shows alerts for Ukrainian regions. Your last region stays selected, or Kyiv if there was none.</string>
+    <string name="got_it">Got It</string>
+    <string name="region_changed">Region changed: %1$s</string>
+    <string name="close">Close</string>
+    <string name="location_denied">No location access</string>
+    <string name="location_enable_tip">Turn on location access for a more precise region</string>
+    <string name="location_open_settings">Open Settings</string>
+</resources>

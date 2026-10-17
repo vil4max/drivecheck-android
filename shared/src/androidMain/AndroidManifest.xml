@@ -4,5 +4,8 @@
     <!-- A normal permission (no prompt): Data Saver on a metered network lengthens the polling
          interval (REQ-REFRESH-002). -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- PlatformLocationSource checks the grant at run time; the app asks after onboarding. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 </manifest>
