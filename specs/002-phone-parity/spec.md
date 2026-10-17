@@ -18,6 +18,12 @@ The Android app becomes the iOS phone app:
 
 Screenshot tests render every screen on the JVM at every build (owner, 2026-10-17, answer «А»).
 
+Visual parity (owner, 2026-10-17, through the orchestrator): the iOS App Store screenshots
+(`regional-check` `release/screenshots/asc/01`–`06`) are the visual reference for every screen.
+The screens follow them in layout, glyphs, colours, sizes and wording. The Roborazzi baselines are
+recorded from the matching layout, and the owner gets each Android screenshot next to its iOS
+counterpart.
+
 Conventions are spec 001's. A requirement defined in 001 and extended here is amended in place in
 001 with a dated note. iOS behaviour without an iOS ID gets an `ANDROID` ID, and the requirement
 names the iOS source file.

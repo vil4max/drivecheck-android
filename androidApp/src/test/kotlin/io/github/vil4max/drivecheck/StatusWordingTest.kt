@@ -31,13 +31,13 @@ class StatusWordingTest {
                 "status_checking" to listOf("Checking…", "Перевіряємо…", "Проверяем…"),
                 "status_unavailable" to listOf("Unavailable", "Недоступно", "Недоступно"),
                 "status_region_unavailable" to listOf("Region Unavailable", "Регіон недоступний", "Регион недоступен"),
-                "status_updated" to listOf("Updated: %1\$s", "Оновлено: %1\$s", "Обновлено: %1\$s"),
+                "status_updated" to listOf("Updated %1\$s", "Оновлено %1\$s", "Обновлено %1\$s"),
                 "region_kyiv_city" to listOf("Kyiv", "Київ", "Киев"),
                 "action_refresh" to listOf("Refresh", "Оновити", "Обновить"),
                 "hint_unavailable" to listOf(
-                    "Tap Refresh to try again",
-                    "Натисніть «Оновити», щоб спробувати знову",
-                    "Нажмите «Обновить», чтобы попробовать снова",
+                    "Pull to refresh and try again",
+                    "Потягніть униз, щоб оновити й спробувати знову",
+                    "Потяните вниз, чтобы обновить и попробовать снова",
                 ),
             ),
         )

@@ -6,9 +6,9 @@
     <string name="status_checking">Checking…</string>
     <string name="status_unavailable">Unavailable</string>
     <string name="status_region_unavailable">Region Unavailable</string>
-    <string name="status_updated">Updated: %1$s</string>
+    <string name="status_updated">Updated %1$s</string>
     <string name="action_refresh">Refresh</string>
-    <string name="hint_unavailable">Tap Refresh to try again</string>
+    <string name="hint_unavailable">Pull to refresh and try again</string>
     <string name="informational_source">Alert data is informational only. Do not rely on it for critical decisions.</string>
     <string name="status_stay_alert">Stay Alert</string>
     <string name="status_no_current_data">No Current Data</string>
