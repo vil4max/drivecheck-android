@@ -191,6 +191,8 @@ Given the current region is quiet on fresh data and at least one neighbour is un
 When half or more of its neighbours are under alert, or more than half of the country is, or, for Kyiv city, Kyiv Oblast is\
 Then the Status hero shows "Stay Alert" in yellow instead of "No Alert", and the nearby line keeps naming the neighbours; stale data never turns yellow
 
+Amended 2026-10-17 by spec 003: the home-screen widget and the quick-settings tile follow the same rule.
+
 ### REQ-SURF-012 — The Status title area is transparent
 
 Status: approved
