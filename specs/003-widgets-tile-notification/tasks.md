@@ -9,4 +9,4 @@ Feature: `003-widgets-tile-notification` · One PR, one commit per group, tests 
 - [x] T005 Group 2: the widget provider, layouts and strings (en, uk, ru).
 - [x] T006 Group 3 tests: notification post, update and end, the Refresh action, the Details switch (`REQ_SURF_008_*`), and the tile.
 - [x] T007 Group 3: `AlertNotifier`, the receiver, the tile service, the Details switch, and the permission.
-- [ ] T008 PR with the review packet; screenshots to the owner.
+- [x] T008 PR with the review packet; screenshots to the owner.
