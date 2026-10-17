@@ -10,4 +10,8 @@
     <string name="action_refresh">Обновить</string>
     <string name="hint_unavailable">Нажмите «Обновить», чтобы попробовать снова</string>
     <string name="informational_source">Данные тревог носят информационный характер. Не полагайтесь на них при критических решениях.</string>
+    <string name="status_stay_alert">Будьте внимательны</string>
+    <string name="status_no_current_data">Нет актуальных данных</string>
+    <string name="status_short_alarm">Тревога</string>
+    <string name="status_meta_last_known">Последнее известное: %1$s · %2$s</string>
 </resources>

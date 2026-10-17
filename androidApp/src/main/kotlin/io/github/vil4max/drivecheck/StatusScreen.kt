@@ -1,7 +1,9 @@
 package io.github.vil4max.drivecheck
 
 import android.text.format.DateFormat
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,8 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +33,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.vil4max.drivecheck.status.StatusState
+import io.github.vil4max.drivecheck.status.DisplayPhase
+import io.github.vil4max.drivecheck.status.StatusPresentation
 import io.github.vil4max.drivecheck.theme.DriveCheckColors
 import java.util.Date
 import kotlin.time.Instant
@@ -47,11 +48,21 @@ fun StatusScreen(viewModel: StatusViewModel) {
         onStopOrDispose { viewModel.onScreenStopped() }
     }
 
-    StatusContent(state = state.status, isChecking = state.isChecking, onRefresh = viewModel::refresh)
+    StatusContent(
+        presentation = state.presentation,
+        regionName = stringResource(R.string.region_kyiv_city),
+        isChecking = state.isChecking,
+        onRefresh = viewModel::refresh,
+    )
 }
 
 @Composable
-fun StatusContent(state: StatusState, isChecking: Boolean, onRefresh: () -> Unit) {
+fun StatusContent(
+    presentation: StatusPresentation,
+    regionName: String,
+    isChecking: Boolean,
+    onRefresh: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -64,23 +75,23 @@ fun StatusContent(state: StatusState, isChecking: Boolean, onRefresh: () -> Unit
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
         ) {
-            Text(stringResource(R.string.region_kyiv_city), style = MaterialTheme.typography.titleLarge)
+            Text(regionName, style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(16.dp))
             Box(
                 Modifier
                     .size(24.dp)
-                    .background(state.indicatorColor(), CircleShape),
+                    .background(presentation.phase.color(), CircleShape),
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = stringResource(state.titleRes()),
+                text = stringResource(presentation.phase.titleRes()),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
             )
-            state.detail()?.let { detail ->
+            presentation.meta()?.let { meta ->
                 Spacer(Modifier.height(8.dp))
-                Text(detail, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+                Text(meta, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
             }
         }
         Spacer(Modifier.height(32.dp))
@@ -108,31 +119,41 @@ fun StatusContent(state: StatusState, isChecking: Boolean, onRefresh: () -> Unit
     }
 }
 
-private fun StatusState.titleRes(): Int = when (this) {
-    StatusState.Checking -> R.string.status_checking
-    is StatusState.Quiet -> R.string.status_quiet
-    is StatusState.Alarm -> R.string.status_alarm
-    StatusState.Unavailable -> R.string.status_unavailable
-    StatusState.RegionUnavailable -> R.string.status_region_unavailable
+private fun DisplayPhase.titleRes(): Int = when (this) {
+    DisplayPhase.Checking -> R.string.status_checking
+    DisplayPhase.NoAlert -> R.string.status_quiet
+    DisplayPhase.StayAlert -> R.string.status_stay_alert
+    DisplayPhase.Alarm -> R.string.status_alarm
+    DisplayPhase.Stale -> R.string.status_no_current_data
+    DisplayPhase.Unavailable -> R.string.status_unavailable
+    DisplayPhase.RegionUnavailable -> R.string.status_region_unavailable
 }
 
 // The colour repeats what the title already says; the status never depends on colour alone.
-private fun StatusState.indicatorColor(): Color = when (this) {
-    is StatusState.Alarm -> DriveCheckColors.statusAlert
-    is StatusState.Quiet -> DriveCheckColors.statusClear
+fun DisplayPhase.color(): Color = when (this) {
+    DisplayPhase.Alarm -> DriveCheckColors.statusAlert
+    DisplayPhase.NoAlert -> DriveCheckColors.statusClear
+    DisplayPhase.StayAlert -> DriveCheckColors.statusCaution
+    DisplayPhase.Stale -> DriveCheckColors.statusNoData
     else -> DriveCheckColors.statusChecking
 }
 
+// "Updated HH:mm" for current data; "Last known: {status} · HH:mm" once it is stale.
 @Composable
-private fun StatusState.detail(): String? = when (this) {
-    is StatusState.Quiet -> updatedLine(checkedAt)
-    is StatusState.Alarm -> updatedLine(checkedAt)
-    StatusState.Unavailable -> stringResource(R.string.hint_unavailable)
-    else -> null
+private fun StatusPresentation.meta(): String? {
+    val checkedAt = checkedAt
+    return when {
+        phase == DisplayPhase.Unavailable -> stringResource(R.string.hint_unavailable)
+        checkedAt == null -> null
+        isStale -> stringResource(
+            R.string.status_meta_last_known,
+            stringResource(if (phase == DisplayPhase.Alarm) R.string.status_short_alarm else R.string.status_quiet),
+            formatTime(checkedAt),
+        )
+        else -> stringResource(R.string.status_updated, formatTime(checkedAt))
+    }
 }
 
 @Composable
-private fun updatedLine(checkedAt: Instant): String {
-    val time = DateFormat.getTimeFormat(LocalContext.current).format(Date(checkedAt.toEpochMilliseconds()))
-    return stringResource(R.string.status_updated, time)
-}
+fun formatTime(instant: Instant): String =
+    DateFormat.getTimeFormat(LocalContext.current).format(Date(instant.toEpochMilliseconds()))

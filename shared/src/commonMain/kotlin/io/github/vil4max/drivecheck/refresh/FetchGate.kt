@@ -5,6 +5,17 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
+// What the polling interval depends on (REQ-REFRESH-002). Android reads it from the system
+// (AndroidRefreshEnvironment); tests pass it directly.
+data class RefreshEnvironment(
+    val isAlarmActive: Boolean = false,
+    val isPowerSaveMode: Boolean = false,
+    val isThermalSevere: Boolean = false,
+    val isDataSaverConstrained: Boolean = false,
+) {
+    val isConstrained: Boolean get() = isPowerSaveMode || isThermalSevere || isDataSaverConstrained
+}
+
 object RefreshPolicy {
     // Above the provider's 3 s server cache, inside which a refetch returns the same data
     // (REQ-REFRESH-010).
@@ -14,12 +25,29 @@ object RefreshPolicy {
     // Android-only (REQ-ANDROID-001): the floor does not hold after a failure, and a button has
     // no pull gesture to pace it, so any two requests start at least this far apart.
     val minRequestGap: Duration = 2.seconds
+
+    val baselineInterval: Duration = 60.seconds
+    val alarmInterval: Duration = 30.seconds
+    val constrainedInterval: Duration = 300.seconds
+    private const val JITTER_FRACTION = 0.10
+
+    fun baseInterval(environment: RefreshEnvironment): Duration = when {
+        environment.isConstrained -> constrainedInterval
+        environment.isAlarmActive -> alarmInterval
+        else -> baselineInterval
+    }
+
+    // jitterUnit in [0, 1] maps to -10 % .. +10 % of the base interval.
+    fun interval(environment: RefreshEnvironment, jitterUnit: Double): Duration {
+        val signed = jitterUnit.coerceIn(0.0, 1.0) * 2 - 1
+        return baseInterval(environment) * (1 + signed * JITTER_FRACTION)
+    }
 }
 
-// The two holds on a fetch (REQ-REFRESH-005, REQ-REFRESH-010), apart from the controller so they
-// can be tested with plain instants.
-class FetchGate {
-    var rateLimitedUntil: Instant? = null
+// The holds on a fetch (REQ-REFRESH-005, REQ-REFRESH-010, REQ-ANDROID-001), apart from the
+// controller so they can be tested with plain instants.
+class FetchGate(rateLimitedUntil: Instant? = null) {
+    var rateLimitedUntil: Instant? = rateLimitedUntil
         private set
     var lastSuccessAt: Instant? = null
         private set

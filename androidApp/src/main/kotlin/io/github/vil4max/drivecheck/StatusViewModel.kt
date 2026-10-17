@@ -1,30 +1,60 @@
 package io.github.vil4max.drivecheck
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.vil4max.drivecheck.provider.AndroidProviderLog
 import io.github.vil4max.drivecheck.provider.UbillingClient
 import io.github.vil4max.drivecheck.provider.UrlConnectionTransport
+import io.github.vil4max.drivecheck.refresh.AndroidRefreshEnvironment
 import io.github.vil4max.drivecheck.status.StatusController
-import io.github.vil4max.drivecheck.status.StatusState
+import io.github.vil4max.drivecheck.status.StatusPresentation
+import io.github.vil4max.drivecheck.status.StatusPresenter
+import io.github.vil4max.drivecheck.store.PreferencesStatusStore
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 
-data class StatusScreenState(val status: StatusState, val isChecking: Boolean)
+data class StatusScreenState(val presentation: StatusPresentation, val isChecking: Boolean)
 
-class StatusViewModel : ViewModel() {
-    private val controller = StatusController(client, Clock.System, viewModelScope)
+class StatusViewModel(application: Application) : AndroidViewModel(application) {
+    private val controller = StatusController(
+        provider = client,
+        clock = Clock.System,
+        scope = viewModelScope,
+        store = PreferencesStatusStore(application),
+        environment = AndroidRefreshEnvironment(application)::read,
+    )
+
+    // Staleness depends on time passing, so the presentation is recomputed on a slow tick too.
+    private val tick = flow {
+        while (true) {
+            emit(Unit)
+            delay(10.seconds)
+        }
+    }
+
+    private fun present(): StatusPresentation = StatusPresenter.present(
+        state = controller.state.value,
+        snapshot = controller.snapshot.value,
+        region = controller.region.value,
+        now = Clock.System.now(),
+        baseInterval = controller.baseInterval(),
+    )
 
     val state: StateFlow<StatusScreenState> =
-        combine(controller.state, controller.isChecking, ::StatusScreenState)
-            .stateIn(
-                viewModelScope,
-                SharingStarted.Eagerly,
-                StatusScreenState(controller.state.value, controller.isChecking.value),
-            )
+        combine(controller.state, controller.snapshot, controller.isChecking, tick) { _, _, isChecking, _ ->
+            StatusScreenState(present(), isChecking)
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            StatusScreenState(present(), controller.isChecking.value),
+        )
 
     fun onScreenStarted() = controller.onSurfaceStarted()
 
