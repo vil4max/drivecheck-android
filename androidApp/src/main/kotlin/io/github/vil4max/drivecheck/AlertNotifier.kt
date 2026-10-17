@@ -22,6 +22,7 @@ import kotlin.time.Instant
 object AlertNotifier {
     const val CHANNEL_ID = "alert"
     private const val ID = 1
+    private const val KEY_REGION = "posted_region"
 
     fun sync(context: Context, mayPost: Boolean, now: Instant = Clock.System.now()) {
         val app = context.applicationContext
@@ -29,7 +30,14 @@ object AlertNotifier {
         val store = AppGraph.store(app)
         val snapshot = store.loadSnapshot()
         val region = store.loadRegion() ?: AlertRegion.KyivCity
-        val isPosted = manager.activeNotifications.any { it.id == ID }
+        val prefs = app.getSharedPreferences("notification", Context.MODE_PRIVATE)
+        var isPosted = manager.activeNotifications.any { it.id == ID }
+        // The alarm belongs to the region that raised it; after a region change it never reads
+        // "Air Raid Alert" under a quiet region, and the new region's own alarm posts afresh.
+        if (isPosted && prefs.getString(KEY_REGION, null) != region.name) {
+            manager.cancel(ID)
+            isPosted = false
+        }
         val isStale = snapshot == null || AlertNotificationPolicy.isStale(snapshot.checkedAt, now)
         val allowed = NotificationSettings(app).isAllowed()
         when (AlertNotificationPolicy.decide(isPosted, snapshot?.status(region), confirmed = !isStale, allowed = allowed)) {
@@ -68,11 +76,13 @@ object AlertNotifier {
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setCategory(Notification.CATEGORY_STATUS)
-            .setShowWhen(false)
+            .setWhen(snapshot.checkedAt.toEpochMilliseconds())
+            .setShowWhen(true)
             .setContentIntent(PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE))
             .addAction(Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_stat_alert), context.getString(R.string.action_refresh), refresh).build())
             .build()
         manager.notify(ID, notification)
+        context.getSharedPreferences("notification", Context.MODE_PRIVATE).edit().putString(KEY_REGION, region.name).apply()
     }
 }
 

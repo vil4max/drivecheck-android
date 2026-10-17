@@ -1,6 +1,10 @@
 package io.github.vil4max.drivecheck.provider
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.EOFException
@@ -15,8 +19,25 @@ import java.net.URI
 import java.net.UnknownHostException
 
 class UrlConnectionTransport : HttpTransport {
-    override suspend fun execute(request: HttpRequest): HttpResponse = withContext(Dispatchers.IO) {
+    override suspend fun execute(request: HttpRequest): HttpResponse = coroutineScope {
         val connection = URI(request.url).toURL().openConnection() as HttpURLConnection
+        // A blocking read ignores cancellation; closing the socket from here ends it, so a caller's
+        // timeout (the 8 s background bound) holds.
+        val closeOnCancel = launch {
+            try {
+                awaitCancellation()
+            } finally {
+                connection.disconnect()
+            }
+        }
+        try {
+            read(connection, request)
+        } finally {
+            closeOnCancel.cancel()
+        }
+    }
+
+    private suspend fun read(connection: HttpURLConnection, request: HttpRequest): HttpResponse = withContext(Dispatchers.IO) {
         try {
             configure(connection, request)
             val status = connection.responseCode
@@ -28,6 +49,8 @@ class UrlConnectionTransport : HttpTransport {
                 .mapValues { it.value.firstOrNull().orEmpty() }
             HttpResponse(status, headers, body)
         } catch (error: IOException) {
+            // The socket closed by a cancellation is the cancellation, not a failure.
+            ensureActive()
             throw TransportFailure(classify(error), error)
         } finally {
             connection.disconnect()

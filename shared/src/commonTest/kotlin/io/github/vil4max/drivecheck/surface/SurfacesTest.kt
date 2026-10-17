@@ -105,6 +105,18 @@ class SurfacesTest {
         assertEquals(BackgroundOutcome.Failed, slow.run(isScheduled = false), "bounded at 8 s")
     }
 
+    // With the app closed nothing else redraws, so the surfaces wake at each boundary of the data's
+    // age: the widget's ⚠ at 3 min, "Open the app" at 10 min, the notification's staleness after 15.
+    @Test
+    fun REQ_REFRESH_009_the_next_redraw_is_the_next_age_boundary() {
+        val checked = now - 1.minutes
+        assertEquals(checked + 3.minutes, SurfaceSchedule.nextRedraw(checked, now))
+        assertEquals(checked + 10.minutes, SurfaceSchedule.nextRedraw(checked, checked + 3.minutes))
+        assertEquals(checked + 15.minutes + 1.seconds, SurfaceSchedule.nextRedraw(checked, checked + 10.minutes))
+        assertEquals(null, SurfaceSchedule.nextRedraw(checked, checked + 16.minutes))
+        assertEquals(true, AlertNotificationPolicy.isStale(checked, checked + 15.minutes + 1.seconds))
+    }
+
     // The widget redraws from the store on each emission, so the store must already hold it.
     @Test
     fun REQ_REFRESH_009_a_fetch_and_a_region_are_saved_before_they_are_published() = runTest {

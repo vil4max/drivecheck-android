@@ -1,6 +1,7 @@
 package io.github.vil4max.drivecheck
 
 import android.Manifest
+import android.app.AlarmManager
 import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
@@ -22,6 +23,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 // The ongoing notification, the tile and the Details switch, against the stored snapshot.
@@ -61,6 +63,37 @@ class AlertSurfacesTest {
         assertEquals("Kyiv · Updated 1:06 PM", notification.text())
         assertTrue(notification.flags and Notification.FLAG_ONGOING_EVENT != 0)
         assertEquals("Refresh", notification.actions.single().title.toString())
+        assertEquals((now - 1.minutes).toEpochMilliseconds(), notification.`when`, "the system shows the age itself")
+        assertTrue(notification.extras.getBoolean(Notification.EXTRA_SHOW_WHEN))
+    }
+
+    @Test
+    fun REQ_SURF_009_a_region_change_never_shows_an_alarm_under_another_region() {
+        store(1, AlertStatus.Alarm)
+        AlertNotifier.sync(app, mayPost = true, now = now)
+        // Old data confirms nothing, so only the region change can end it.
+        store(20, AlertStatus.Alarm)
+        AppGraph.store(app).saveRegion(AlertRegion.Lviv)
+        AlertNotifier.sync(app, mayPost = true, now = now)
+        assertNull(posted(), "Lviv is quiet")
+
+        store(1, AlertStatus.Alarm)
+        AppGraph.store(app).saveSnapshot(AppGraph.store(app).loadSnapshot()!!.let { it.copy(statuses = it.statuses + (AlertRegion.Lviv to AlertStatus.Alarm)) })
+        AppGraph.store(app).saveRegion(AlertRegion.Lviv)
+        AlertNotifier.sync(app, mayPost = true, now = now)
+        assertEquals("Lviv Oblast · Updated 1:06 PM", posted()!!.text())
+    }
+
+    @Test
+    fun REQ_REFRESH_009_updating_the_surfaces_schedules_a_redraw_at_the_next_age_boundary() {
+        val checkedAt = Clock.System.now() - 1.minutes
+        AppGraph.store(app).saveSnapshot(AlertsSnapshot("t", checkedAt, checkedAt, mapOf(AlertRegion.KyivCity to AlertStatus.Quiet)))
+
+        Surfaces.updateAll(app)
+
+        val alarm = shadowOf(app.getSystemService(AlarmManager::class.java)).nextScheduledAlarm!!
+        assertEquals(AlarmManager.RTC, alarm.type, "inexact and non-waking")
+        assertEquals((checkedAt + 3.minutes).toEpochMilliseconds(), alarm.triggerAtTime)
     }
 
     @Test
