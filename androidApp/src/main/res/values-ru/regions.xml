@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="region_kyiv_city">Киев</string>
+    <string name="region_vinnytsia">Винницкая область</string>
+    <string name="region_volyn">Волынская область</string>
+    <string name="region_dnipropetrovsk">Днепропетровская область</string>
+    <string name="region_donetsk">Донецкая область</string>
+    <string name="region_zhytomyr">Житомирская область</string>
+    <string name="region_zakarpattia">Закарпатская область</string>
+    <string name="region_zaporizhzhia">Запорожская область</string>
+    <string name="region_ivano_frankivsk">Ивано-Франковская область</string>
+    <string name="region_kyiv_oblast">Киевская область</string>
+    <string name="region_kirovohrad">Кировоградская область</string>
+    <string name="region_luhansk">Луганская область</string>
+    <string name="region_lviv">Львовская область</string>
+    <string name="region_mykolaiv">Николаевская область</string>
+    <string name="region_odesa">Одесская область</string>
+    <string name="region_poltava">Полтавская область</string>
+    <string name="region_rivne">Ровенская область</string>
+    <string name="region_sumy">Сумская область</string>
+    <string name="region_ternopil">Тернопольская область</string>
+    <string name="region_kharkiv">Харьковская область</string>
+    <string name="region_kherson">Херсонская область</string>
+    <string name="region_khmelnytskyi">Хмельницкая область</string>
+    <string name="region_cherkasy">Черкасская область</string>
+    <string name="region_chernivtsi">Черновицкая область</string>
+    <string name="region_chernihiv">Черниговская область</string>
+    <string name="nearby_line">Рядом: %1$s</string>
+    <string name="nearby_names_more">%1$s +%2$d</string>
+</resources>

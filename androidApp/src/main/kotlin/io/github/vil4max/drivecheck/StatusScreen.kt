@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,7 +52,7 @@ fun StatusScreen(viewModel: StatusViewModel) {
 
     StatusContent(
         presentation = state.presentation,
-        regionName = stringResource(R.string.region_kyiv_city),
+        regionName = stringResource(state.region.nameRes()),
         isChecking = state.isChecking,
         onRefresh = viewModel::refresh,
     )
@@ -92,6 +94,14 @@ fun StatusContent(
             presentation.meta()?.let { meta ->
                 Spacer(Modifier.height(8.dp))
                 Text(meta, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+            }
+            nearbyText(presentation.nearbyAlerts)?.let { nearby ->
+                Spacer(Modifier.height(12.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.size(10.dp).background(DriveCheckColors.statusCaution, CircleShape))
+                    Spacer(Modifier.width(8.dp))
+                    Text(nearby, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+                }
             }
         }
         Spacer(Modifier.height(32.dp))

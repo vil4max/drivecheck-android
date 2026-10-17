@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import com.github.takahirom.roborazzi.captureRoboImage
 import io.github.vil4max.drivecheck.StatusContent
+import io.github.vil4max.drivecheck.domain.AlertRegion
 import io.github.vil4max.drivecheck.status.DisplayPhase
 import io.github.vil4max.drivecheck.status.StatusPresentation
 import io.github.vil4max.drivecheck.theme.DriveCheckTheme
@@ -41,12 +42,13 @@ class StatusScreenshotTest {
         checkedAt: Instant? = this.checkedAt,
         isStale: Boolean = false,
         isChecking: Boolean = false,
+        nearby: List<AlertRegion> = emptyList(),
     ) {
         compose.setContent {
             DriveCheckTheme {
                 Surface {
                     StatusContent(
-                        presentation = StatusPresentation(phase, checkedAt, isStale, nearbyAlerts = emptyList()),
+                        presentation = StatusPresentation(phase, checkedAt, isStale, nearbyAlerts = nearby),
                         regionName = "Kyiv",
                         isChecking = isChecking,
                         onRefresh = {},
@@ -74,4 +76,14 @@ class StatusScreenshotTest {
 
     @Test
     fun status_stale_alarm() = capture("stale_alarm", DisplayPhase.Alarm, isStale = true)
+
+    @Test
+    fun status_stay_alert() = capture("stay_alert", DisplayPhase.StayAlert, nearby = listOf(AlertRegion.KyivOblast))
+
+    @Test
+    fun status_alarm_with_nearby() = capture(
+        "alarm_nearby",
+        DisplayPhase.Alarm,
+        nearby = listOf(AlertRegion.KyivOblast, AlertRegion.Chernihiv, AlertRegion.Poltava),
+    )
 }

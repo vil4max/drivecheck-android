@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Region names as in the iOS DriveCheckKit catalog. -->
+<resources>
+    <string name="region_kyiv_city">Kyiv</string>
+    <string name="region_vinnytsia">Vinnytsia Oblast</string>
+    <string name="region_volyn">Volyn Oblast</string>
+    <string name="region_dnipropetrovsk">Dnipropetrovsk Oblast</string>
+    <string name="region_donetsk">Donetsk Oblast</string>
+    <string name="region_zhytomyr">Zhytomyr Oblast</string>
+    <string name="region_zakarpattia">Zakarpattia Oblast</string>
+    <string name="region_zaporizhzhia">Zaporizhzhia Oblast</string>
+    <string name="region_ivano_frankivsk">Ivano-Frankivsk Oblast</string>
+    <string name="region_kyiv_oblast">Kyiv Oblast</string>
+    <string name="region_kirovohrad">Kirovohrad Oblast</string>
+    <string name="region_luhansk">Luhansk Oblast</string>
+    <string name="region_lviv">Lviv Oblast</string>
+    <string name="region_mykolaiv">Mykolaiv Oblast</string>
+    <string name="region_odesa">Odesa Oblast</string>
+    <string name="region_poltava">Poltava Oblast</string>
+    <string name="region_rivne">Rivne Oblast</string>
+    <string name="region_sumy">Sumy Oblast</string>
+    <string name="region_ternopil">Ternopil Oblast</string>
+    <string name="region_kharkiv">Kharkiv Oblast</string>
+    <string name="region_kherson">Kherson Oblast</string>
+    <string name="region_khmelnytskyi">Khmelnytskyi Oblast</string>
+    <string name="region_cherkasy">Cherkasy Oblast</string>
+    <string name="region_chernivtsi">Chernivtsi Oblast</string>
+    <string name="region_chernihiv">Chernihiv Oblast</string>
+    <string name="nearby_line">Nearby: %1$s</string>
+    <string name="nearby_names_more">%1$s +%2$d</string>
+</resources>
