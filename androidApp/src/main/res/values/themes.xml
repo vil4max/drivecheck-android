@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- REQ-LAUNCH-001: the launch window is the neutral app background, never a status colour. -->
+<resources>
+    <color name="drivecheck_background">#0C0E11</color>
+
+    <style name="Theme.DriveCheck" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/drivecheck_background</item>
+        <item name="android:colorBackground">@color/drivecheck_background</item>
+    </style>
+</resources>
