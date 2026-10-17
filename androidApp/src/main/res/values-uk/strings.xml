@@ -6,7 +6,6 @@
     <string name="status_unavailable">Недоступно</string>
     <string name="status_region_unavailable">Регіон недоступний</string>
     <string name="status_updated">Оновлено: %1$s</string>
-    <string name="region_kyiv_city">Київ</string>
     <string name="action_refresh">Оновити</string>
     <string name="hint_unavailable">Натисніть «Оновити», щоб спробувати знову</string>
     <string name="informational_source">Дані тривог мають інформаційний характер. Не покладайтеся на них при критичних рішеннях.</string>

@@ -171,7 +171,7 @@ Source: iOS REQ-SURF-005 (amended 2026-09-21), `docs/requirements/surfaces-and-p
 
 Given neighbouring regions are under alert\
 When the Status tab shows the current region, quiet or in alarm\
-Then a nearby line names them ("Nearby: …", at most two names and "+N more"), from the iOS neighbour table (`NearbyRegionPolicy`, Kyiv city with its wider ring); with none nearby there is no line
+Then a nearby line names them ("Nearby: …", at most two names and "+N" for the rest, the iOS wording), from the iOS neighbour table (`NearbyRegionPolicy`, Kyiv city with its wider ring); with none nearby there is no line
 
 ### REQ-SURF-010 — Stay Alert when alerts surround a quiet region
 

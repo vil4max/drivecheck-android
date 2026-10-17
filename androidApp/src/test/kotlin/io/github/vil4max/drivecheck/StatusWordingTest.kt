@@ -6,15 +6,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class StatusWordingTest {
-    private fun strings(folder: String): Map<String, String> {
-        val document = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-            .parse(File("src/main/res/$folder/strings.xml"))
-        val nodes = document.getElementsByTagName("string")
-        return (0 until nodes.length).associate { index ->
-            val node = nodes.item(index)
-            node.attributes.getNamedItem("name").nodeValue to node.textContent
-        }
-    }
+    private fun strings(folder: String): Map<String, String> =
+        File("src/main/res/$folder").listFiles { file -> file.extension == "xml" }.orEmpty().flatMap { file ->
+            val nodes = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getElementsByTagName("string")
+            (0 until nodes.length).map { index ->
+                val node = nodes.item(index)
+                node.attributes.getNamedItem("name").nodeValue to node.textContent
+            }
+        }.toMap()
 
     private fun assertWording(expected: Map<String, List<String>>) {
         listOf("values", "values-uk", "values-ru").forEachIndexed { locale, folder ->
@@ -40,6 +39,18 @@ class StatusWordingTest {
                     "Натисніть «Оновити», щоб спробувати знову",
                     "Нажмите «Обновить», чтобы попробовать снова",
                 ),
+            ),
+        )
+    }
+
+    @Test
+    fun REQ_SURF_010_stay_alert_and_the_nearby_line_match_ios_in_en_uk_ru() {
+        assertWording(
+            mapOf(
+                "status_stay_alert" to listOf("Stay Alert", "Будьте уважні", "Будьте внимательны"),
+                "nearby_line" to listOf("Nearby: %1\$s", "Поруч: %1\$s", "Рядом: %1\$s"),
+                "region_kyiv_oblast" to listOf("Kyiv Oblast", "Київська область", "Киевская область"),
+                "region_zaporizhzhia" to listOf("Zaporizhzhia Oblast", "Запорізька область", "Запорожская область"),
             ),
         )
     }
