@@ -2,7 +2,7 @@ package io.github.vil4max.drivecheck
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalResources
 import io.github.vil4max.drivecheck.domain.AlertRegion
 import android.content.res.Resources
 import io.github.vil4max.drivecheck.domain.AlertsSnapshot
@@ -55,11 +55,13 @@ fun localizedRegionList(snapshot: AlertsSnapshot?, current: AlertRegion, resourc
         comparator = regionNameOrder(resources.configuration.locales[0]),
     )
 
-// "Nearby: A, B +N" (REQ-SURF-005).
+// "Nearby: A, B +N" (REQ-SURF-005), the same words on the phone and in the car.
 @Composable
-fun nearbyText(regions: List<AlertRegion>): String? {
+fun nearbyText(regions: List<AlertRegion>): String? = nearbyText(LocalResources.current, regions)
+
+fun nearbyText(resources: Resources, regions: List<AlertRegion>): String? {
     val line = NearbyLine.of(regions) ?: return null
-    val names = line.names.map { stringResource(it.nameRes()) }.joinToString(", ")
-    val shown = if (line.more > 0) stringResource(R.string.nearby_names_more, names, line.more) else names
-    return stringResource(R.string.nearby_line, shown)
+    val names = line.names.map { resources.getString(it.nameRes()) }.joinToString(", ")
+    val shown = if (line.more > 0) resources.getString(R.string.nearby_names_more, names, line.more) else names
+    return resources.getString(R.string.nearby_line, shown)
 }

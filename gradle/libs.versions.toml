@@ -13,6 +13,7 @@ kotlinxDatetime = "0.8.0"
 junit = "4.13.2"
 roborazzi = "1.76.0"
 robolectric = "4.17"
+carApp = "1.7.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -36,6 +37,8 @@ robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectr
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-car-app = { module = "androidx.car.app:app", version.ref = "carApp" }
+androidx-car-app-testing = { module = "androidx.car.app:app-testing", version.ref = "carApp" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
