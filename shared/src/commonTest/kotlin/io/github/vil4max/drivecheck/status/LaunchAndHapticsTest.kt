@@ -64,6 +64,32 @@ class LaunchAndHapticsTest {
     }
 
     @Test
+    fun REQ_ANDROID_001_the_pull_indicator_shows_only_for_the_drivers_refresh() = runTest {
+        val slow = CompletableDeferred<Unit>()
+        var calls = 0
+        val controller = StatusController(
+            AlertsProvider {
+                calls += 1
+                if (calls == 2) slow.await()
+                snapshot(clock.now, AlertStatus.Quiet)
+            },
+            clock,
+            backgroundScope,
+        )
+        controller.onSurfaceStarted()
+        runCurrent()
+        assertEquals(false, controller.isDriverRefreshing.value, "the start is not a pull")
+
+        clock.now += 11.seconds
+        controller.refresh()
+        runCurrent()
+        assertEquals(true, controller.isDriverRefreshing.value)
+        slow.complete(Unit)
+        runCurrent()
+        assertEquals(false, controller.isDriverRefreshing.value)
+    }
+
+    @Test
     fun REQ_REFRESH_011_a_driver_refresh_ends_with_confirm_or_reject_and_automatic_ones_with_nothing() = runTest {
         var fail = false
         val controller = StatusController(

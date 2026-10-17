@@ -29,6 +29,8 @@ import io.github.vil4max.drivecheck.domain.AlertRegion.Cherkasy
 import io.github.vil4max.drivecheck.domain.AlertStatus
 import io.github.vil4max.drivecheck.domain.AlertsSnapshot
 import io.github.vil4max.drivecheck.nameRes
+import io.github.vil4max.drivecheck.regionNameOrder
+import androidx.compose.ui.platform.LocalResources
 import io.github.vil4max.drivecheck.status.DetailsSummary
 import io.github.vil4max.drivecheck.status.DisplayPhase
 import io.github.vil4max.drivecheck.status.RegionList
@@ -114,15 +116,23 @@ class ShellScreenshotTest {
     @Test
     fun REQ_ANDROID_002_map_failed() = capture("map_failed") { StatusWithMap(MapCardState.Failed, DisplayPhase.NoAlert) }
 
-    @Test
-    fun REQ_ANDROID_003_region_list() = capture("region_list", "en") {
-        RegionListScreen(RegionList.of(snapshot, Cherkasy) { it.name }!!, onBack = {})
+    // As the app builds it: localized names in the locale's alphabet order.
+    @Composable
+    private fun localizedList(): RegionList {
+        val resources = LocalResources.current
+        return RegionList.of(
+            snapshot,
+            Cherkasy,
+            name = { resources.getString(it.nameRes()) },
+            comparator = regionNameOrder(resources.configuration.locales[0]),
+        )!!
     }
 
     @Test
-    fun REQ_ANDROID_003_region_list_uk() = capture("region_list") {
-        RegionListScreen(RegionList.of(snapshot, Cherkasy) { it.name }!!, onBack = {})
-    }
+    fun REQ_ANDROID_003_region_list() = capture("region_list", "en") { RegionListScreen(localizedList(), onBack = {}) }
+
+    @Test
+    fun REQ_ANDROID_003_region_list_uk() = capture("region_list") { RegionListScreen(localizedList(), onBack = {}) }
 
     @Test
     fun REQ_ANDROID_004_details() = capture("details", "en") {

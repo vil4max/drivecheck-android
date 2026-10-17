@@ -68,6 +68,10 @@ class StatusController(
     val refreshOutcomes: SharedFlow<RefreshOutcome> = _refreshOutcomes.asSharedFlow()
     private var driverIsWaiting = false
 
+    // The pull indicator: only a refresh the driver started, not the start or a scheduled poll.
+    private val _isDriverRefreshing = MutableStateFlow(false)
+    val isDriverRefreshing: StateFlow<Boolean> = _isDriverRefreshing.asStateFlow()
+
     private val gate = FetchGate(rateLimitedUntil = store.loadRateLimitedUntil())
     private var inFlight: Job? = null
     private var polling: Job? = null
@@ -125,7 +129,10 @@ class StatusController(
         if (!isSurfaceStarted) return
         if (inFlight?.isActive == true) {
             // A driver's pull waits for the request already running and gets its outcome.
-            if (byDriver) driverIsWaiting = true
+            if (byDriver) {
+                driverIsWaiting = true
+                _isDriverRefreshing.value = true
+            }
             return
         }
         if (gate.isHeld(isScheduled, clock.now())) {
@@ -135,6 +142,7 @@ class StatusController(
         gate.recordStart(clock.now())
         _isChecking.value = true
         driverIsWaiting = byDriver
+        _isDriverRefreshing.value = byDriver
         inFlight = scope.launch {
             var succeeded = false
             try {
@@ -144,6 +152,7 @@ class StatusController(
                 // the end keeps the next request at least the gap after it (REQ-ANDROID-001).
                 gate.recordStart(clock.now())
                 _isChecking.value = false
+                _isDriverRefreshing.value = false
                 if (driverIsWaiting) {
                     _refreshOutcomes.tryEmit(if (succeeded) RefreshOutcome.Confirm else RefreshOutcome.Reject)
                     driverIsWaiting = false

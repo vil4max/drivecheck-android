@@ -275,7 +275,7 @@ Source: iOS REQ-LAUNCH-005
 
 Given animations are off (`ANIMATOR_DURATION_SCALE` 0) or TalkBack is on\
 When status changes\
-Then there is no spring or sweep (at most a 200 ms cross-fade), and TalkBack announces the hero once
+Then there is no spring or sweep (at most a 200 ms cross-fade), and TalkBack announces a status change once: only the status word is a live region, so the update time, which changes every minute, is never re-announced
 
 ### REQ-ANDROID-002 — Inline alert map
 

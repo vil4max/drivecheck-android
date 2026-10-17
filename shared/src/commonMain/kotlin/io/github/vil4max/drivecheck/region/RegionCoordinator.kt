@@ -29,7 +29,9 @@ class RegionCoordinator(
     private val onboardingDone = MutableStateFlow(store.isOnboardingDone())
     val isOnboardingDone: StateFlow<Boolean> = onboardingDone.asStateFlow()
 
-    private var permission: Boolean? = null
+    // iOS asks once: after the first answer, a launch without access reads as denied, and the app
+    // re-checks the real grant when it comes back to the screen.
+    private var permission: Boolean? = if (store.wasPermissionAsked()) false else null
     private val _shouldRequestPermission = MutableStateFlow(false)
     val shouldRequestPermission: StateFlow<Boolean> = _shouldRequestPermission.asStateFlow()
     private val _shouldTrackLocation = MutableStateFlow(false)
@@ -52,7 +54,13 @@ class RegionCoordinator(
         updateGates()
     }
 
+    // A deferred retry belongs to the screen that saw the fix; it does not run in the background.
+    fun onTrackingStopped() {
+        retry?.cancel()
+    }
+
     fun onPermission(granted: Boolean, precise: Boolean = true) {
+        store.setPermissionAsked()
         permission = granted
         tracker.approximateOnly = granted && !precise
         updateGates()

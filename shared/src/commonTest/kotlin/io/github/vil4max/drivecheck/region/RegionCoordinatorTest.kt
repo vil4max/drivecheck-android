@@ -118,6 +118,36 @@ class RegionCoordinatorTest {
     }
 
     @Test
+    fun REQ_REGION_009_the_prompt_is_asked_once_and_a_later_launch_reads_the_answer() = runTest {
+        val store = InMemoryStatusStore()
+        val (first, _) = setUp(Geocoder { null }, store)
+        first.completeOnboarding()
+        assertTrue(first.shouldRequestPermission.value)
+        first.onPermission(granted = false)
+
+        val (next, _) = setUp(Geocoder { null }, store)
+
+        assertFalse(next.shouldRequestPermission.value, "iOS asks once")
+        assertTrue(next.isLocationDenied.value)
+    }
+
+    @Test
+    fun REQ_REGION_005_a_deferred_retry_stops_with_the_screen() = runTest {
+        val geocoder = Geocoder { error("down") }
+        val (coordinator, _) = setUp(geocoder)
+        coordinator.completeOnboarding()
+        coordinator.onPermission(granted = true)
+        coordinator.onFix(fix())
+        runCurrent()
+
+        coordinator.onTrackingStopped()
+        advanceTimeBy(120.seconds)
+        runCurrent()
+
+        assertEquals(1, geocoder.calls)
+    }
+
+    @Test
     fun REQ_REGION_009_denied_access_stops_tracking_and_keeps_the_last_region() = runTest {
         val store = InMemoryStatusStore().apply { saveRegion(AlertRegion.Odesa) }
         val (coordinator, controller) = setUp(Geocoder { null }, store)

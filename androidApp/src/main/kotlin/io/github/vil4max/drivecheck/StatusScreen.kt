@@ -77,11 +77,12 @@ fun StatusContent(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.semantics(mergeDescendants = true) {
-                    liveRegion = LiveRegionMode.Polite
                     customActions = listOf(CustomAccessibilityAction(refreshLabel) { onRefresh(); true })
                 },
             ) {
                 StatusHero(presentation.phase, Modifier.padding(top = 8.dp), size = layout.heroSize)
+                // Only the status word is live (REQ-LAUNCH-005): the update time changes every
+                // minute and must not be re-announced. A merging child stays out of the hero's node.
                 Text(
                     text = stringResource(presentation.phase.titleRes()),
                     color = presentation.phase.color(),
@@ -89,6 +90,7 @@ fun StatusContent(
                     lineHeight = 46.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
+                    modifier = Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {

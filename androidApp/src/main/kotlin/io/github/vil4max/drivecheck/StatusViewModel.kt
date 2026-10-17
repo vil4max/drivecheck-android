@@ -37,6 +37,7 @@ data class StatusScreenState(
     val presentation: StatusPresentation,
     val region: AlertRegion,
     val isChecking: Boolean,
+    val isDriverRefreshing: Boolean = false,
     val isOnboardingDone: Boolean = true,
     val isLocationDenied: Boolean = false,
     val notice: AlertRegion? = null,
@@ -93,6 +94,7 @@ class StatusViewModel(application: Application) : AndroidViewModel(application) 
         ),
         region = controller.region.value,
         isChecking = controller.isChecking.value,
+        isDriverRefreshing = controller.isDriverRefreshing.value,
         isOnboardingDone = coordinator.isOnboardingDone.value,
         isLocationDenied = coordinator.isLocationDenied.value,
         notice = coordinator.notice.value,
@@ -102,24 +104,30 @@ class StatusViewModel(application: Application) : AndroidViewModel(application) 
 
     val state: StateFlow<StatusScreenState> = combine(
         listOf(
-            controller.state, controller.snapshot, controller.isChecking, controller.region, tick,
+            controller.state, controller.snapshot, controller.isChecking, controller.isDriverRefreshing, controller.region, tick,
             coordinator.isOnboardingDone, coordinator.isLocationDenied, coordinator.notice,
             coordinator.showOutsideSheet, coordinator.shouldRequestPermission,
         ),
     ) { current() }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), current())
 
+    // A rotation stops and starts the screen but is not a new foreground session (the map stays).
+    private var stoppedForConfigurationChange = false
+
     fun onScreenStarted() {
         isStarted.value = true
-        map.onNewSession()
+        if (!stoppedForConfigurationChange) map.onNewSession()
+        stoppedForConfigurationChange = false
         controller.onSurfaceStarted()
         if (!controller.isChecking.value) map.onStatusSettled()
         // Coming back from the system settings may have changed the answer.
         if (coordinator.isLocationDenied.value && location.hasPermission()) onPermissionResult()
     }
 
-    fun onScreenStopped() {
+    fun onScreenStopped(isChangingConfigurations: Boolean = false) {
         isStarted.value = false
+        stoppedForConfigurationChange = isChangingConfigurations
         controller.onSurfaceStopped()
+        coordinator.onTrackingStopped()
     }
 
     fun refresh() = controller.refresh()

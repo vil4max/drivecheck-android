@@ -378,7 +378,8 @@ Differs from iOS: Android-only. iOS has no such minimum gap; its phone refresh i
 
 Amended 2026-10-17 by spec 002, for visual parity with the iOS app (owner, through the orchestrator):
 the Refresh button is replaced by pull to refresh, as on the iPhone, with a TalkBack "Refresh"
-action on the hero. While a request runs, the pull indicator shows and a new pull starts nothing.
+action on the hero. While a request the driver started runs, the pull indicator shows and a new
+pull starts nothing; the start of the screen and scheduled polls show no indicator.
 The 2 s gap is unchanged. The 4.5:1 clause applied to the disabled button and lapses with it.
 
 Look (owner, 2026-10-17): the Status screen uses the iOS app's palette and, like it, is dark only;
