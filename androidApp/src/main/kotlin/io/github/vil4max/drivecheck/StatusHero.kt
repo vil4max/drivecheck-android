@@ -27,9 +27,16 @@ fun StatusHero(phase: DisplayPhase, modifier: Modifier = Modifier, size: Dp = 20
     val color = phase.color()
     Canvas(modifier.size(size)) {
         val radius = this.size.minDimension / 2
+        // A soft, wide glow, as iOS: the colour fades out well beyond the tick ring.
         drawCircle(
-            brush = Brush.radialGradient(listOf(color.copy(alpha = 0.20f), Color.Transparent), center, radius * 1.15f),
-            radius = radius * 1.15f,
+            brush = Brush.radialGradient(
+                0f to color.copy(alpha = 0.16f),
+                0.55f to color.copy(alpha = 0.07f),
+                1f to Color.Transparent,
+                center = center,
+                radius = radius * 1.6f,
+            ),
+            radius = radius * 1.6f,
         )
         drawTicks(color, radius)
         val dial = radius * 0.70f
@@ -57,24 +64,29 @@ private fun DrawScope.drawTicks(color: Color, radius: Float) {
     }
 }
 
+// The radar sweep: a filled wedge whose tail fades out, ending in a bright leading edge at
+// about four o'clock, as on iOS.
 private fun DrawScope.drawSweep(color: Color, dial: Float) {
-    rotate(-60f) {
+    val lead = 20f
+    val span = 70f
+    rotate(lead - span) {
         drawArc(
             brush = Brush.sweepGradient(
                 0f to Color.Transparent,
-                0.16f to color.copy(alpha = 0.35f),
-                0.1667f to Color.Transparent,
+                (span / 360f) to color.copy(alpha = 0.42f),
+                (span / 360f) + 0.0001f to Color.Transparent,
                 center = center,
             ),
             startAngle = 0f,
-            sweepAngle = 60f,
+            sweepAngle = span,
             useCenter = true,
             topLeft = center - Offset(dial, dial),
             size = Size(dial * 2, dial * 2),
         )
     }
-    val end = center + Offset(dial * cos(0f), dial * sin(0f))
-    drawLine(color.copy(alpha = 0.9f), center + Offset(dial * 0.82f, 0f), end, 2.dp.toPx(), StrokeCap.Round)
+    val angle = lead * (Math.PI / 180).toFloat()
+    val edge = Offset(cos(angle), sin(angle))
+    drawLine(color.copy(alpha = 0.95f), center + edge * (dial * 0.8f), center + edge * dial, 2.5.dp.toPx(), StrokeCap.Round)
 }
 
 private fun DrawScope.drawSymbol(phase: DisplayPhase, color: Color, disc: Float) {
