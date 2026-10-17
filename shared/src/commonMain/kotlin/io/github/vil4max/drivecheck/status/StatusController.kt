@@ -43,7 +43,8 @@ class StatusController(
     private val environment: () -> RefreshEnvironment = { RefreshEnvironment() },
     private val jitter: () -> Double = { Random.nextDouble() },
 ) {
-    private val _region = MutableStateFlow(region)
+    // REQ-REGION-008: the last region stays; the given default (Kyiv city) only when none is stored.
+    private val _region = MutableStateFlow(store.loadRegion() ?: region)
     val region: StateFlow<AlertRegion> = _region.asStateFlow()
 
     private val _snapshot = MutableStateFlow(store.loadSnapshot())
@@ -74,6 +75,16 @@ class StatusController(
     }
 
     fun refresh() = trigger()
+
+    // A committed region shows from the held snapshot at once and is saved; the refresh that
+    // follows goes through the usual holds (iOS refresh policy, "Region change").
+    fun selectRegion(region: AlertRegion) {
+        if (region == _region.value) return
+        _region.value = region
+        store.saveRegion(region)
+        _snapshot.value?.let { _state.value = resolve(it) }
+        trigger()
+    }
 
     fun isRateLimited(): Boolean = gate.isRateLimited(clock.now())
 

@@ -42,6 +42,26 @@ class StatusStoreTest {
     }
 
     @Test
+    fun REQ_REGION_008_the_last_region_stays_and_kyiv_city_is_the_default() = runTest {
+        val empty = StatusController(AlertsProvider { snapshot }, TestClock(), backgroundScope, store = InMemoryStatusStore())
+        val stored = InMemoryStatusStore().apply { saveRegion(AlertRegion.Lviv) }
+
+        assertEquals(AlertRegion.KyivCity, empty.region.value)
+        assertEquals(AlertRegion.Lviv, StatusController(AlertsProvider { snapshot }, TestClock(), backgroundScope, store = stored).region.value)
+    }
+
+    @Test
+    fun REQ_REGION_006_a_committed_region_shows_from_the_snapshot_at_once_and_is_saved() = runTest {
+        val store = InMemoryStatusStore().apply { saveSnapshot(snapshot) }
+        val controller = StatusController(AlertsProvider { snapshot }, TestClock(), backgroundScope, store = store)
+
+        controller.selectRegion(AlertRegion.Lviv)
+
+        assertEquals(StatusState.Quiet(snapshot.checkedAt), controller.state.value)
+        assertEquals(AlertRegion.Lviv, store.loadRegion())
+    }
+
+    @Test
     fun REQ_ANDROID_006_a_stored_snapshot_is_shown_at_start_and_a_fetch_is_saved() = runTest {
         val store = InMemoryStatusStore().apply { saveSnapshot(snapshot) }
         val fresh = snapshot.copy(statuses = mapOf(AlertRegion.KyivCity to AlertStatus.Quiet))
