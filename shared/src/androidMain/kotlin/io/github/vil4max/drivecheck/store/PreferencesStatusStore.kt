@@ -35,14 +35,14 @@ class PreferencesStatusStore(context: Context) : StatusStore {
         prefs.edit().putBoolean(KEY_ONBOARDING, true).apply()
     }
 
-    override fun wasPermissionAsked(): Boolean = prefs.getBoolean(KEY_PERMISSION_ASKED, false)
+    override fun wasPermissionDenied(): Boolean = prefs.getBoolean(KEY_PERMISSION_DENIED, false)
 
-    override fun setPermissionAsked() {
-        prefs.edit().putBoolean(KEY_PERMISSION_ASKED, true).apply()
+    override fun setPermissionDenied(denied: Boolean) {
+        prefs.edit().putBoolean(KEY_PERMISSION_DENIED, denied).apply()
     }
 
     private companion object {
-        const val KEY_PERMISSION_ASKED = "permissionAsked.v1"
+        const val KEY_PERMISSION_DENIED = "permissionDenied.v1"
         const val KEY_SNAPSHOT = "snapshot.v1"
         const val KEY_REGION = "region.v1"
         const val KEY_RATE_LIMIT = "rateLimitedUntil.v1"

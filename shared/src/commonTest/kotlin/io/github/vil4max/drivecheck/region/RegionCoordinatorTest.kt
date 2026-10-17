@@ -132,6 +132,31 @@ class RegionCoordinatorTest {
     }
 
     @Test
+    fun REQ_REGION_009_a_one_time_grant_is_not_remembered_so_the_next_launch_asks_again() = runTest {
+        val store = InMemoryStatusStore()
+        val (first, _) = setUp(Geocoder { null }, store)
+        first.completeOnboarding()
+        first.onPermission(granted = true)
+
+        val (next, _) = setUp(Geocoder { null }, store)
+
+        assertTrue(next.shouldRequestPermission.value, "Android's 'Only this time', like iOS Allow Once")
+        assertFalse(next.isLocationDenied.value)
+    }
+
+    @Test
+    fun REQ_REGION_009_a_granted_launch_never_shows_the_denied_card() = runTest {
+        val store = InMemoryStatusStore().apply { setOnboardingDone() }
+        val snapshot = AlertsSnapshot("t", null, epoch, emptyMap())
+        val controller = StatusController(AlertsProvider { snapshot }, clock(), backgroundScope, store = store)
+
+        val coordinator = RegionCoordinator(RegionTracker(Geocoder { null }, clock()), controller, store, backgroundScope, initiallyGranted = true)
+
+        assertFalse(coordinator.isLocationDenied.value)
+        assertTrue(coordinator.shouldTrackLocation.value)
+    }
+
+    @Test
     fun REQ_REGION_005_a_deferred_retry_stops_with_the_screen() = runTest {
         val geocoder = Geocoder { error("down") }
         val (coordinator, _) = setUp(geocoder)

@@ -21,6 +21,7 @@ class RegionCoordinator(
     private val controller: StatusController,
     private val store: StatusStore,
     private val scope: CoroutineScope,
+    initiallyGranted: Boolean = false,
 ) {
     private val evaluation = Mutex()
     private val outsideNotice = OutsideUkraineNotice()
@@ -29,9 +30,13 @@ class RegionCoordinator(
     private val onboardingDone = MutableStateFlow(store.isOnboardingDone())
     val isOnboardingDone: StateFlow<Boolean> = onboardingDone.asStateFlow()
 
-    // iOS asks once: after the first answer, a launch without access reads as denied, and the app
-    // re-checks the real grant when it comes back to the screen.
-    private var permission: Boolean? = if (store.wasPermissionAsked()) false else null
+    // A launch starts from the real grant. Only a denial is remembered: iOS does not ask again after
+    // "Don't Allow", but asks again after "Allow Once", which is Android's "Only this time".
+    private var permission: Boolean? = when {
+        initiallyGranted -> true
+        store.wasPermissionDenied() -> false
+        else -> null
+    }
     private val _shouldRequestPermission = MutableStateFlow(false)
     val shouldRequestPermission: StateFlow<Boolean> = _shouldRequestPermission.asStateFlow()
     private val _shouldTrackLocation = MutableStateFlow(false)
@@ -60,7 +65,7 @@ class RegionCoordinator(
     }
 
     fun onPermission(granted: Boolean, precise: Boolean = true) {
-        store.setPermissionAsked()
+        store.setPermissionDenied(!granted)
         permission = granted
         tracker.approximateOnly = granted && !precise
         updateGates()

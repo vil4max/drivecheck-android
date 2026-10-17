@@ -12,6 +12,7 @@ import io.github.vil4max.drivecheck.store.InMemoryStatusStore
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -65,26 +66,39 @@ class LaunchAndHapticsTest {
 
     @Test
     fun REQ_ANDROID_001_the_pull_indicator_shows_only_for_the_drivers_refresh() = runTest {
-        val slow = CompletableDeferred<Unit>()
-        var calls = 0
+        var gate = CompletableDeferred<Unit>()
         val controller = StatusController(
             AlertsProvider {
-                calls += 1
-                if (calls == 2) slow.await()
+                gate.await()
                 snapshot(clock.now, AlertStatus.Quiet)
             },
             clock,
             backgroundScope,
+            jitter = { 0.5 },
         )
+
         controller.onSurfaceStarted()
         runCurrent()
+        assertEquals(true, controller.isChecking.value, "the start fetch is in flight")
         assertEquals(false, controller.isDriverRefreshing.value, "the start is not a pull")
+        gate.complete(Unit)
+        runCurrent()
 
+        gate = CompletableDeferred()
+        clock.now += 60.seconds
+        advanceTimeBy(60.seconds)
+        runCurrent()
+        assertEquals(true, controller.isChecking.value, "a scheduled poll is in flight")
+        assertEquals(false, controller.isDriverRefreshing.value, "a scheduled poll is not a pull")
+        gate.complete(Unit)
+        runCurrent()
+
+        gate = CompletableDeferred()
         clock.now += 11.seconds
         controller.refresh()
         runCurrent()
         assertEquals(true, controller.isDriverRefreshing.value)
-        slow.complete(Unit)
+        gate.complete(Unit)
         runCurrent()
         assertEquals(false, controller.isDriverRefreshing.value)
     }

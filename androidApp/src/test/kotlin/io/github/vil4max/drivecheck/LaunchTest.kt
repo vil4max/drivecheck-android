@@ -2,6 +2,7 @@ package io.github.vil4max.drivecheck
 
 import androidx.compose.material3.Surface
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
@@ -37,7 +38,7 @@ class LaunchTest {
     }
 
     @Test
-    fun REQ_LAUNCH_005_talkback_hears_the_hero_as_one_polite_announcement() {
+    fun REQ_LAUNCH_005_only_the_status_word_is_a_polite_live_region_and_it_offers_refresh() {
         compose.setContent {
             DriveCheckTheme {
                 Surface {
@@ -56,5 +57,7 @@ class LaunchTest {
         // Only the status word is live, so the minute-by-minute update time is never re-announced.
         val text = live[0].fetchSemanticsNode().config.getOrElse(SemanticsProperties.Text) { emptyList() }.joinToString { it.text }
         assertEquals("Air Raid Alert", text)
+        val actions = live[0].fetchSemanticsNode().config.getOrElse(SemanticsActions.CustomActions) { emptyList() }
+        assertEquals(listOf("Refresh"), actions.map { it.label }, "the focused status word keeps TalkBack's Refresh")
     }
 }

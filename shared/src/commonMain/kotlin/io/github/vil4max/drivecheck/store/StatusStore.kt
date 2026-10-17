@@ -17,8 +17,8 @@ interface StatusStore {
     fun saveRateLimitedUntil(until: Instant)
     fun isOnboardingDone(): Boolean
     fun setOnboardingDone()
-    fun wasPermissionAsked(): Boolean
-    fun setPermissionAsked()
+    fun wasPermissionDenied(): Boolean
+    fun setPermissionDenied(denied: Boolean)
 }
 
 class InMemoryStatusStore : StatusStore {
@@ -43,10 +43,10 @@ class InMemoryStatusStore : StatusStore {
     override fun setOnboardingDone() {
         onboardingDone = true
     }
-    private var permissionAsked = false
-    override fun wasPermissionAsked() = permissionAsked
-    override fun setPermissionAsked() {
-        permissionAsked = true
+    private var permissionDenied = false
+    override fun wasPermissionDenied() = permissionDenied
+    override fun setPermissionDenied(denied: Boolean) {
+        permissionDenied = denied
     }
 }
 
