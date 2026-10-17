@@ -41,10 +41,11 @@ object Surfaces {
 
     private fun updateEverything(context: Context, mayPostNotification: Boolean) {
         val app = context.applicationContext
+        // First, so a surface that throws cannot stop the timed redraws.
+        scheduleRedraw(app)
         StatusWidgetProvider.render(app)
         AlertNotifier.sync(app, mayPostNotification)
         TileService.requestListeningState(app, ComponentName(app, StatusTileService::class.java))
-        scheduleRedraw(app)
     }
 
     // With the app closed nothing else redraws: wake at the data's next age boundary, inexact and

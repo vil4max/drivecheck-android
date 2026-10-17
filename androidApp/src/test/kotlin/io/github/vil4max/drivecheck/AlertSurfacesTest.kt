@@ -5,6 +5,7 @@ import android.app.AlarmManager
 import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
+import android.content.ComponentName
 import android.service.quicksettings.Tile
 import androidx.test.core.app.ApplicationProvider
 import io.github.vil4max.drivecheck.domain.AlertRegion
@@ -20,6 +21,7 @@ import org.robolectric.annotation.Config
 import java.util.TimeZone
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.minutes
@@ -90,10 +92,16 @@ class AlertSurfacesTest {
         AppGraph.store(app).saveSnapshot(AlertsSnapshot("t", checkedAt, checkedAt, mapOf(AlertRegion.KyivCity to AlertStatus.Quiet)))
 
         Surfaces.updateAll(app)
+        Surfaces.updateAll(app)
 
-        val alarm = shadowOf(app.getSystemService(AlarmManager::class.java)).nextScheduledAlarm!!
+        val alarms = shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms
+        assertEquals(1, alarms.size, "each update replaces the pending redraw")
+        val alarm = assertNotNull(alarms.single(), "a redraw is scheduled")
         assertEquals(AlarmManager.RTC, alarm.type, "inexact and non-waking")
         assertEquals((checkedAt + 3.minutes).toEpochMilliseconds(), alarm.triggerAtTime)
+        val target = shadowOf(alarm.operation).savedIntent
+        assertEquals(StatusWidgetProvider.ACTION_REDRAW, target.action, "a redraw, never a fetch")
+        assertEquals(ComponentName(app, StatusWidgetProvider::class.java), target.component)
     }
 
     @Test

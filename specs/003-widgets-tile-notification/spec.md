@@ -41,7 +41,7 @@ Given a widget is on the home screen\
 When the system runs its periodic update\
 Then the widget fetches once (skipped inside a stored rate-limit window), saves a successful snapshot for the app, and a failed fetch keeps the last known good snapshot
 
-Differs from iOS: Android updates a widget at most every 30 minutes (`updatePeriodMillis`), where iOS asks for 180/300/120 s within WidgetKit's budget. The freshness tiers below make the age visible.
+Differs from iOS: Android updates a widget at most every 30 minutes (`updatePeriodMillis`), where iOS asks for 180/300/120 s within WidgetKit's budget. The freshness tiers below make the age visible. With the app closed, the tiers are redrawn from the stored snapshot by an inexact, non-waking alarm at each age boundary; Doze and app standby can delay it by minutes, where iOS reloads the timeline on time.
 
 ### REQ-REFRESH-009 — Widget freshness tiers
 
@@ -77,7 +77,7 @@ Source: iOS REQ-SURF-009 (Live Activity)
 
 Given the in-app switch and the system both allow the notification (REQ-SURF-008)\
 When the app or a widget update sees the current region in alarm\
-Then an ongoing notification shows the region, "Air Raid Alert" and the update time, and stays when the app goes to the background. It ends as soon as a confirmed all-clear is seen. A failed, stale or unknown refresh never ends it. While there is no alarm, none is posted. Its Refresh action fetches once (8 s) and applies the result like any refresh, and never posts a notification.
+Then an ongoing notification shows the region, "Air Raid Alert" and the update time, and stays when the app goes to the background. It ends as soon as a confirmed all-clear is seen, and when the current region changes (the new region's own alarm posts afresh). A failed, stale or unknown refresh never ends it. While there is no alarm, none is posted. Its Refresh action fetches once (8 s) and applies the result like any refresh, and never posts a notification.
 
 Differs from iOS: the Live Activity is an Android ongoing notification. Since Android 14 the driver can swipe it away; it comes back with the next alarm update. The periodic widget update also refreshes it while the app is closed, which iOS cannot do.
 
