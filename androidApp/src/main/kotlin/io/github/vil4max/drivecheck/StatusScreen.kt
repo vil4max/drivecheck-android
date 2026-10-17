@@ -163,7 +163,7 @@ data class StatusLayout(val heroSize: Dp, val mapWidth: Dp) {
     }
 }
 
-private fun DisplayPhase.titleRes(): Int = when (this) {
+internal fun DisplayPhase.titleRes(): Int = when (this) {
     DisplayPhase.Checking -> R.string.status_checking
     DisplayPhase.NoAlert -> R.string.status_quiet
     DisplayPhase.StayAlert -> R.string.status_stay_alert
