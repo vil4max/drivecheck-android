@@ -10,4 +10,11 @@ Feature: `004-android-auto` · One PR, one commit per group, tests first.
 - [x] T004 Group 3: the onboarding and listing copy name Android Auto again; the copy guard follows
   the manifest; specs 002 T018 and 005 updated.
 - [x] T005 PR with the review packet.
+- [x] T007 Review fixes: the template quota (H1), stale reads No Current Data (M1), the CarPlay
+  refresh cycle (M2), session wiring tests (M3), the review-risk note (M4); lows L1, L2, L5, L6.
 - [ ] T006 Desktop Head Unit and real-car runs (SC-003), when a device is available.
+
+## Backlog from the review
+
+- L3: on a fresh install the car shows Kyiv as if resolved; it has no "no region yet" state.
+- L4: with the phone and the car both started, each update redraws the widget twice.

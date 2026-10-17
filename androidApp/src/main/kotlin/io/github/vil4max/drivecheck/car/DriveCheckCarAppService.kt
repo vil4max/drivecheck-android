@@ -1,5 +1,6 @@
 package io.github.vil4max.drivecheck.car
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import androidx.car.app.CarAppService
@@ -11,6 +12,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import io.github.vil4max.drivecheck.AppGraph
 import io.github.vil4max.drivecheck.Surfaces
+import io.github.vil4max.drivecheck.status.StatusController
 import io.github.vil4max.drivecheck.status.StatusPresenter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
@@ -37,15 +39,22 @@ class DriveCheckCarAppService : CarAppService() {
 }
 
 // The car is a surface like the phone: it starts the shared refresh while it is on screen and
-// reads the same controller, store and region (REQ-REFRESH-001, REQ-REFRESH-002).
-class DriveCheckCarSession : Session() {
+// reads the same controller, store and region (REQ-REFRESH-001, REQ-REFRESH-002). Connecting and
+// the car's Refresh each run the CarPlay refresh cycle (REQ-REFRESH-004).
+class DriveCheckCarSession(
+    private val controllerOf: (Context) -> StatusController = AppGraph::controller,
+) : Session() {
     override fun onCreateScreen(intent: Intent): Screen {
         val app = carContext.applicationContext
-        val controller = AppGraph.controller(app)
+        val controller = controllerOf(app)
         val store = AppGraph.store(app)
         lifecycle.addObserver(
             object : DefaultLifecycleObserver {
-                override fun onStart(owner: LifecycleOwner) = controller.onSurfaceStarted()
+                override fun onStart(owner: LifecycleOwner) {
+                    controller.onSurfaceStarted(fetchNow = false)
+                    controller.startRefreshCycle()
+                }
+
                 override fun onStop(owner: LifecycleOwner) = controller.onSurfaceStopped()
             },
         )
@@ -71,6 +80,6 @@ class DriveCheckCarSession : Session() {
         val status = combine(controller.state, controller.snapshot, controller.region, controller.isChecking, tick) { _, _, _, _, _ -> current() }
             .stateIn(lifecycleScope, SharingStarted.Eagerly, current())
         controller.snapshot.onEach { Surfaces.updateAll(app) }.launchIn(lifecycleScope)
-        return CarStatusScreen(carContext, status, controller::refresh)
+        return CarStatusScreen(carContext, status, controller::startRefreshCycle)
     }
 }

@@ -37,6 +37,12 @@ class ListingLengthsTest(unittest.TestCase):
     def test_android_auto_may_be_named_because_it_ships(self):
         self.assertEqual([], listing.check(page("Статус на екрані авто", "Android Auto: the car screen.")))
 
+    def test_android_auto_is_refused_when_the_car_service_is_not_declared(self):
+        self.assertEqual(
+            ["en-US Full description: promises Android Auto, which this app does not ship"],
+            listing.check(page("x", "Android Auto: the car screen."), car_ships=False),
+        )
+
     def test_a_long_app_name_is_reported(self):
         self.assertEqual(["App name: 31 > 30"], listing.check(page("x", name="n" * 31)))
 

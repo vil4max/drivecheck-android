@@ -29,12 +29,10 @@ Google Play lists a car app only in a supported category. Read on developer.andr
     location or a user specified location."
   - PC-1: "The app must not include features outside the app types intended for cars."
   - Car apps are reviewed manually, and updates are not distributed until they are approved.
-- IN-1 names "imminent alerts for the current location" as relevant content for a weather app.
-
-The app declares `androidx.car.app.category.WEATHER`. That is the only listed category whose
-content is a status at the driver's current location. The owner accepts the risk that the car
-review rejects it as not weather content. A rejection would hold back the Play release until the
-car service is removed or an appeal succeeds.
+The app declares `androidx.car.app.category.WEATHER`, the only listed category whose content is
+about the driver's current location. An air-raid status is not weather content, so a rejection
+under WE-1 or PC-1 is the likely outcome of the car review. The owner accepts that risk. A
+rejection would hold back the Play release until the car service is removed or an appeal succeeds.
 
 ## Sideloaded builds
 
@@ -64,11 +62,13 @@ Source: iOS REQ-SURF-006 (amended 2026-09-21), `docs/requirements/surfaces-and-p
 
 Given an Android Auto session\
 When its screen is built\
-Then it is a single pane with no tabs and no map. Its contents are:
-- the status in the title, in the full form;
-- the region with its update time ("Last known: … · HH:mm" once stale);
-- the nearby row, only when a neighbouring region is under alert (REQ-SURF-005);
-- the location-denied row, only when access is denied;
+Then it is a single pane with no tabs and no map, and no status change ever counts as a new
+template. Its contents are:
+- the app's name as the fixed title;
+- a "Status" row: the status in the full form, then the region with its update time, with the
+  status icon (red alert, yellow alert, green check);
+- a "Nearby" row: the names under alert, or "No alerts nearby"; then the location line, only when
+  access is denied;
 - Refresh as the only action.
 
 It redraws when the status changes. The app is declared in the weather car category.
@@ -76,12 +76,45 @@ It redraws when the status changes. The app is declared in the weather car categ
 Differs from iOS:
 - This slice does not track location in the car. The car shows the region the phone last resolved
   and saved.
-- The pane is `PaneTemplate`. Its glyph is the host's alert icon, red in alarm and yellow for Stay
-  Alert.
+- The status is not the title, and the nearby row is always there. `PaneTemplate` counts a change
+  of the title, the row count or a row title as a new template, and the host closes an app after
+  five of them. A drive during an attack would reach that limit, so the title and the row titles
+  stay fixed and the changing words are row texts. The content is the iOS screen's.
+
+### REQ-REFRESH-004 — Car refresh cycle
+
+Status: approved
+
+Core: P1
+
+Source: iOS REQ-REFRESH-004, `docs/requirements/refresh-policy.md`
+
+Given the car connects, or the driver taps Refresh on the car screen\
+When fetches fail\
+Then the cycle makes up to 3 attempts with 2 s then 4 s backoff, stops at the first answer and
+while rate limited, and a new cycle supersedes the old one without cancelling the request shared
+with the phone
+
+Differs from iOS: an attempt that the 2 s gap between requests (REQ-ANDROID-001) holds waits for
+the gap and is not counted.
+
+### REQ-REFRESH-007 — Car freshness by age
+
+Status: approved
+
+Core: P1, P2
+
+Source: iOS REQ-REFRESH-007, `docs/requirements/refresh-policy.md`
+
+Given the car screen shows a cached status\
+When it is stale\
+Then it reads "No Current Data" with its update time and without a status icon, an alarm included;
+a fresh status keeps its word and icon
 
 ## Success criteria
 
 - **SC-001:** the gate and the trace are green.
-- **SC-002:** `CarStatusScreenTest` covers the pane's rows, the action, the redraw and the
-  manifest category. `PeriodicRefreshTest` covers the counted timer.
+- **SC-002:** `CarStatusScreenTest` covers the pane's rows, the action, the template quota, the
+  stale state, the redraw, the manifest category and the session's cycle. `CarRefreshCycleTest`
+  covers the cycle; `PeriodicRefreshTest` covers the counted timer.
 - **SC-003:** a Desktop Head Unit run and a real car run, once a device is available.

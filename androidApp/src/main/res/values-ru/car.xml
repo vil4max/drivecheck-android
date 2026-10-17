@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="car_row_nearby">Рядом</string>
+    <string name="car_nothing_nearby">Рядом тревог нет</string>
+</resources>

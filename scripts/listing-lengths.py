@@ -10,13 +10,17 @@ import sys
 from pathlib import Path
 
 LIMITS = {"Short description": 80, "Full description": 4000}
-# Spec 004: 1.0 ships the Android Auto screen; CarPlay and Android Automotive OS are never shipped.
-CAR_SURFACES = ["CarPlay", "Automotive"]
+# CarPlay and Android Automotive OS are never shipped; Android Auto only while the manifest
+# declares the car service (spec 004).
+NEVER_SHIPPED = ["CarPlay", "Automotive"]
+ANDROID_AUTO = ["Android Auto", "екрані авто", "экране авто", "автомобіл", "автомобил"]
+MANIFEST = Path(__file__).resolve().parent.parent / "androidApp" / "src" / "main" / "AndroidManifest.xml"
 TITLE_LIMIT = 30
 LISTING = Path(__file__).resolve().parent.parent / "specs" / "005-release" / "play-listing.md"
 
 
-def check(text: str) -> list[str]:
+def check(text: str, car_ships: bool = True) -> list[str]:
+    refused = NEVER_SHIPPED + ([] if car_ships else ANDROID_AUTO)
     problems = []
     locale = None
     field = None
@@ -36,7 +40,7 @@ def check(text: str) -> list[str]:
             found += 1
             if len(body) > LIMITS[field]:
                 problems.append(f"{locale} {field}: {len(body)} > {LIMITS[field]}")
-            for surface in CAR_SURFACES:
+            for surface in refused:
                 if surface.lower() in body.lower():
                     problems.append(f"{locale} {field}: promises {surface}, which this app does not ship")
     if found == 0:
@@ -50,7 +54,8 @@ def check(text: str) -> list[str]:
 
 
 def main() -> int:
-    problems = check(LISTING.read_text(encoding="utf-8"))
+    car_ships = "androidx.car.app.CarAppService" in MANIFEST.read_text(encoding="utf-8")
+    problems = check(LISTING.read_text(encoding="utf-8"), car_ships)
     for problem in problems:
         print(f"listing-lengths: {problem}")
     if not problems:
