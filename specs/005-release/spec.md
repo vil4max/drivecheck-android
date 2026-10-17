@@ -27,9 +27,12 @@ Android Auto lists only apps in its supported categories. None of them fits an a
 - the weather category requires weather content (quality guideline WE-1);
 - PC-1 forbids features outside the car app types.
 
-The decision is the owner's and is pending. Until he decides:
-- this slice ships no Android Auto screen;
-- T018 of spec 002 is applied: the onboarding and the listing do not promise Android Auto.
+Decision (owner, 2026-10-17, through the orchestrator: «А»): no Android Auto in 1.0. The evidence
+and the condition for reopening are in [spec 004](../004-android-auto/spec.md).
+
+T018 of spec 002 is applied: the onboarding says what 1.0 ships, a glance from the home screen
+with the widget and the tile. `ReleaseCopyGuardTest` keeps every locale's strings free of a car
+screen promise, and `scripts/listing-lengths.py` does the same for the listing.
 
 ## Rules the listing follows
 

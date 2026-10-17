@@ -82,6 +82,8 @@ Deviation: groups 6 and 7 landed as one commit, because the Details tab is part 
 
 ## Release guard
 
-- [ ] T018 Before any build reaches Google Play testers: the Android Auto screen exists (a later
+- [x] T018 Before any build reaches Google Play testers: the Android Auto screen exists (a later
   slice), or the onboarding copy that promises it ("designed for Android Auto", "One glance in
   Android Auto") is changed to what the build actually ships (orchestrator, 2026-10-17).
+  Done in spec 005: no Android Auto in 1.0 (owner, 2026-10-17); the copy names the widget and the
+  tile, guarded by `ReleaseCopyGuardTest`.
