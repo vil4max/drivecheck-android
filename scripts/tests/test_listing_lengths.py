@@ -28,6 +28,12 @@ class ListingLengthsTest(unittest.TestCase):
     def test_a_long_full_description_is_reported(self):
         self.assertEqual(["en-US Full description: 4001 > 4000"], listing.check(page("x", "y" * 4001)))
 
+    def test_a_car_screen_promise_is_reported(self):
+        self.assertEqual(
+            ["en-US Full description: promises Android Auto, which 1.0 does not ship"],
+            listing.check(page("x", "Works in android auto.")),
+        )
+
     def test_a_page_without_texts_fails(self):
         self.assertEqual(["no listing text found"], listing.check("## en-US\n"))
 

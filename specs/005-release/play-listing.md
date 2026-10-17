@@ -6,7 +6,7 @@ text and the proposed English description), for what this build ships. The adapt
 - the Live Activity becomes the alert notification;
 - Pro is dropped.
 
-No Android Auto claim appears until the owner decides on Android Auto ([spec.md](spec.md)).
+No Android Auto claim appears: 1.0 ships no car screen ([spec 004](../004-android-auto/spec.md)).
 `scripts/listing-lengths.py` checks every field against Play's limits.
 
 ## Fields

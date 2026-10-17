@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_body">Статус тривоги в регіоні.\nЗроблено для Android Auto.</string>
-    <string name="onboarding_car_title">Один погляд в Android Auto</string>
-    <string name="onboarding_car_caption">Статус вашого регіону на екрані авто</string>
+    <string name="onboarding_body">Статус тривоги в регіоні\nз одного погляду.</string>
+    <string name="onboarding_glance_title">Один погляд з головного екрана</string>
+    <string name="onboarding_glance_caption">Віджет і плитка у швидких налаштуваннях</string>
     <string name="onboarding_location_title">Слідує за вашою геолокацією</string>
     <string name="onboarding_location_caption">Нічого не треба обирати</string>
     <string name="onboarding_free_title">Статус тривоги — безкоштовно</string>

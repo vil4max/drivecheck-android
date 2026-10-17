@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Onboarding, location and region notices, as in the iOS catalogs (CarPlay reads Android Auto). -->
+<!-- Onboarding, location and region notices, as in the iOS catalogs; 1.0 ships no car screen (spec 005). -->
 <resources>
-    <string name="onboarding_body">Regional alert status,\ndesigned for Android Auto.</string>
-    <string name="onboarding_car_title">One glance in Android Auto</string>
-    <string name="onboarding_car_caption">Your region\'s status on the car screen</string>
+    <string name="onboarding_body">Regional alert status,\nat a glance.</string>
+    <string name="onboarding_glance_title">One glance from the home screen</string>
+    <string name="onboarding_glance_caption">A widget and a quick-settings tile</string>
     <string name="onboarding_location_title">Follows your location</string>
     <string name="onboarding_location_caption">Nothing to pick or pin</string>
     <string name="onboarding_free_title">Alert status is free</string>

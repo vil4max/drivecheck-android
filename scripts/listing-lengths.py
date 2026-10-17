@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the Google Play listing texts against Play's length limits.
+"""Check the Google Play listing texts against Play's length limits and the 1.0 surface list.
 
 Reads specs/005-release/play-listing.md: every fenced block under a "### Short description"
 heading must fit 80 characters, and under "### Full description" 4000.
@@ -10,6 +10,8 @@ import sys
 from pathlib import Path
 
 LIMITS = {"Short description": 80, "Full description": 4000}
+# The owner's decision of 2026-10-17 (spec 005): no car screen in 1.0, so no listing text names one.
+CAR_SURFACES = ["Android Auto", "CarPlay", "Automotive"]
 LISTING = Path(__file__).resolve().parent.parent / "specs" / "005-release" / "play-listing.md"
 
 
@@ -33,6 +35,9 @@ def check(text: str) -> list[str]:
             found += 1
             if len(body) > LIMITS[field]:
                 problems.append(f"{locale} {field}: {len(body)} > {LIMITS[field]}")
+            for surface in CAR_SURFACES:
+                if surface.lower() in body.lower():
+                    problems.append(f"{locale} {field}: promises {surface}, which 1.0 does not ship")
     if found == 0:
         problems.append("no listing text found")
     return problems
