@@ -63,6 +63,10 @@ Then the base interval is 60 s, 30 s while the current region is in alarm, and 3
 
 Differs from iOS: Low Power Mode is Android's battery saver (`PowerManager.isPowerSaveMode`). The thermal state `serious` is `THERMAL_STATUS_SEVERE` (API 29+; on API 26–28 not available, treated as normal). The constrained path is Data Saver on a metered network (`ConnectivityManager.restrictBackgroundStatus`). There is no CarPlay to ref-count; one surface, the tab shell, owns the timer.
 
+Amended 2026-10-17 by spec 004: Android Auto is a second surface. The phone's tab shell and the car
+screen share one process-wide controller, and its one timer runs while either is started (counted
+starts and stops, as the iOS timer is shared between CarPlay and the phone).
+
 ### REQ-REFRESH-011 — Refresh answers with a haptic only
 
 Status: approved
@@ -178,6 +182,9 @@ Source: iOS REQ-SURF-005 (amended 2026-09-21), `docs/requirements/surfaces-and-p
 Given neighbouring regions are under alert\
 When the Status tab shows the current region, quiet or in alarm\
 Then a nearby line names them ("Nearby: …", at most two names and "+N" for the rest, the iOS wording), from the iOS neighbour table (`NearbyRegionPolicy`, Kyiv city with its wider ring); with none nearby there is no line
+
+Amended 2026-10-17 by spec 004: the Android Auto screen shows the same line as its own row, only when
+a neighbouring region is under alert, as on CarPlay.
 
 ### REQ-SURF-010 — Stay Alert when alerts surround a quiet region
 
