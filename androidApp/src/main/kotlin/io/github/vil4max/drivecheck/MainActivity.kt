@@ -5,7 +5,11 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
+import androidx.compose.ui.platform.LocalView
+import io.github.vil4max.drivecheck.status.RefreshOutcome
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -97,6 +101,19 @@ private fun AppRoot(viewModel: StatusViewModel, onOpenSettings: () -> Unit, onOp
             viewModel.onPermissionResult()
         } else {
             permissions.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+        }
+    }
+
+    // REQ-REFRESH-011: the driver's pull ends with a haptic only, never a text message.
+    val view = LocalView.current
+    LaunchedEffect(viewModel) {
+        viewModel.refreshOutcomes.collect { outcome ->
+            val feedback = when {
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.R -> HapticFeedbackConstants.VIRTUAL_KEY
+                outcome == RefreshOutcome.Confirm -> HapticFeedbackConstants.CONFIRM
+                else -> HapticFeedbackConstants.REJECT
+            }
+            view.performHapticFeedback(feedback)
         }
     }
 

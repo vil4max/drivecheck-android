@@ -14,7 +14,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
@@ -23,6 +26,10 @@ import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
+
+// How a refresh the driver started ends (REQ-REFRESH-011): a confirm haptic when a request
+// succeeded or a hold kept it, a reject haptic only when the provider request failed.
+enum class RefreshOutcome { Confirm, Reject }
 
 sealed interface StatusState {
     data object Checking : StatusState
@@ -57,6 +64,10 @@ class StatusController(
     private val _isChecking = MutableStateFlow(false)
     val isChecking: StateFlow<Boolean> = _isChecking.asStateFlow()
 
+    private val _refreshOutcomes = MutableSharedFlow<RefreshOutcome>(extraBufferCapacity = 8)
+    val refreshOutcomes: SharedFlow<RefreshOutcome> = _refreshOutcomes.asSharedFlow()
+    private var driverIsWaiting = false
+
     private val gate = FetchGate(rateLimitedUntil = store.loadRateLimitedUntil())
     private var inFlight: Job? = null
     private var polling: Job? = null
@@ -74,7 +85,7 @@ class StatusController(
         polling = null
     }
 
-    fun refresh() = trigger()
+    fun refresh() = trigger(byDriver = true)
 
     // A committed region shows from the held snapshot at once and is saved; the refresh that
     // follows goes through the usual holds (iOS refresh policy, "Region change").
@@ -110,31 +121,45 @@ class StatusController(
 
     // REQ-REFRESH-001: no request without a started surface. REQ-PROVIDER-002: a trigger during a
     // request joins it. REQ-REFRESH-010: the floor holds the rest without touching the state.
-    private fun trigger(isScheduled: Boolean = false) {
+    private fun trigger(isScheduled: Boolean = false, byDriver: Boolean = false) {
         if (!isSurfaceStarted) return
-        if (inFlight?.isActive == true) return
-        if (gate.isHeld(isScheduled, clock.now())) return
+        if (inFlight?.isActive == true) {
+            // A driver's pull waits for the request already running and gets its outcome.
+            if (byDriver) driverIsWaiting = true
+            return
+        }
+        if (gate.isHeld(isScheduled, clock.now())) {
+            if (byDriver) _refreshOutcomes.tryEmit(RefreshOutcome.Confirm)
+            return
+        }
         gate.recordStart(clock.now())
         _isChecking.value = true
+        driverIsWaiting = byDriver
         inFlight = scope.launch {
+            var succeeded = false
             try {
-                fetch()
+                succeeded = fetch()
             } finally {
                 // The client's own retry may have started a request late in the fetch; stamping
                 // the end keeps the next request at least the gap after it (REQ-ANDROID-001).
                 gate.recordStart(clock.now())
                 _isChecking.value = false
+                if (driverIsWaiting) {
+                    _refreshOutcomes.tryEmit(if (succeeded) RefreshOutcome.Confirm else RefreshOutcome.Reject)
+                    driverIsWaiting = false
+                }
             }
         }
     }
 
-    private suspend fun fetch() {
+    private suspend fun fetch(): Boolean {
         try {
             val fetched = provider.fetchAlerts()
             gate.recordSuccess(clock.now())
             _snapshot.value = fetched
             store.saveSnapshot(fetched)
             _state.value = resolve(fetched)
+            return true
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (rateLimited: ProviderFailure.RateLimited) {
@@ -143,6 +168,7 @@ class StatusController(
         } catch (failure: Exception) {
             showUnavailableWithoutSnapshot()
         }
+        return false
     }
 
     // REQ-REFRESH-006: a failure never replaces a known status.

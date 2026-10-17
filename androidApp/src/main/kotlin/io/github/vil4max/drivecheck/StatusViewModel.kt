@@ -124,6 +124,8 @@ class StatusViewModel(application: Application) : AndroidViewModel(application) 
 
     fun refresh() = controller.refresh()
 
+    val refreshOutcomes = controller.refreshOutcomes
+
     fun onMapShown() = map.onCardShown()
 
     fun retryMap() = map.retry()

@@ -7,13 +7,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Canvas
-import androidx.compose.ui.graphics.Color
+import android.graphics.BitmapFactory
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -72,14 +68,11 @@ class ShellScreenshotTest {
         TimeZone.setDefault(TimeZone.getTimeZone("Europe/Kyiv"))
     }
 
-    // A stand-in for the Ubilling map image: green west, orange east.
+    // The real upstream raster: https://ubilling.net.ua/aerialalerts/?map=nightmode, fetched once
+    // on 2026-10-17 (src/test/resources/ubilling-map-nightmode.png).
     private fun fakeMap(): ImageBitmap {
-        val image = ImageBitmap(1000, 670)
-        val canvas = Canvas(image)
-        canvas.drawRect(Rect(Offset.Zero, Size(1000f, 670f)), Paint().apply { color = Color.Black })
-        canvas.drawRect(Rect(Offset(40f, 80f), Size(480f, 500f)), Paint().apply { color = Color(0xFF6A9F4F) })
-        canvas.drawRect(Rect(Offset(520f, 40f), Size(440f, 560f)), Paint().apply { color = Color(0xFFD24A1A) })
-        return image
+        val stream = javaClass.getResourceAsStream("/ubilling-map-nightmode.png") ?: error("map fixture missing")
+        return stream.use { BitmapFactory.decodeStream(it) }.asImageBitmap()
     }
 
     private fun capture(name: String, locale: String = "uk", content: @Composable () -> Unit) {
