@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vil4max.drivecheck.status.StatusState
+import io.github.vil4max.drivecheck.theme.DriveCheckColors
 import java.util.Date
 import kotlin.time.Instant
 
@@ -92,6 +93,7 @@ fun StatusContent(state: StatusState, onRefresh: () -> Unit) {
         Text(
             text = stringResource(R.string.informational_source),
             style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
     }
@@ -107,9 +109,9 @@ private fun StatusState.titleRes(): Int = when (this) {
 
 // The colour repeats what the title already says; the status never depends on colour alone.
 private fun StatusState.indicatorColor(): Color = when (this) {
-    is StatusState.Alarm -> Color(0xFFD32F2F)
-    is StatusState.Quiet -> Color(0xFF2E7D32)
-    else -> Color(0xFF9E9E9E)
+    is StatusState.Alarm -> DriveCheckColors.statusAlert
+    is StatusState.Quiet -> DriveCheckColors.statusClear
+    else -> DriveCheckColors.statusChecking
 }
 
 @Composable
