@@ -5,6 +5,8 @@
     <!-- While the app is open only; asked after onboarding (REQ-REGION-010). -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Asked only when the driver turns on the alert notification (REQ-SURF-008). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="false"
@@ -32,6 +34,24 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/status_widget_info" />
         </receiver>
+
+        <receiver
+            android:name=".NotificationRefreshReceiver"
+            android:exported="false" />
+
+        <service
+            android:name=".StatusTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_stat_alert"
+            android:label="@string/widget_title"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.ACTIVE_TILE"
+                android:value="false" />
+        </service>
     </application>
 
 </manifest>
