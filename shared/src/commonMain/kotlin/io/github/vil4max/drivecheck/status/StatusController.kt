@@ -25,6 +25,8 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 // How a refresh the driver started ends (REQ-REFRESH-011): a confirm haptic when a request
@@ -73,6 +75,8 @@ class StatusController(
     val isDriverRefreshing: StateFlow<Boolean> = _isDriverRefreshing.asStateFlow()
 
     private val gate = FetchGate(rateLimitedUntil = store.loadRateLimitedUntil())
+    private var cycle: Job? = null
+    private var lastFetchSucceeded = false
     private var inFlight: Job? = null
     private var polling: Job? = null
     // The phone and the car are counted: one timer runs while any of them is started, as the
@@ -80,9 +84,11 @@ class StatusController(
     private var startedSurfaces = 0
     private val isSurfaceStarted get() = startedSurfaces > 0
 
-    fun onSurfaceStarted() {
+    // The car passes fetchNow = false and starts its refresh cycle, whose first attempt is the
+    // start's request (REQ-REFRESH-004).
+    fun onSurfaceStarted(fetchNow: Boolean = true) {
         startedSurfaces += 1
-        trigger()
+        if (fetchNow) trigger()
         startPolling()
     }
 
@@ -94,6 +100,42 @@ class StatusController(
     }
 
     fun refresh() = trigger(byDriver = true)
+
+    // REQ-REFRESH-004, the iOS CarPlay cycle: up to 3 attempts, 2 s then 4 s apart, stopping at the
+    // first answer or while rate limited. A new cycle supersedes the old one; the request in
+    // flight is shared and never cancelled. An attempt the 2 s gap holds waits for it instead of
+    // counting.
+    fun startRefreshCycle() {
+        cycle?.cancel()
+        cycle = scope.launch {
+            var attempts = 0
+            while (attempts < CYCLE_BACKOFF.size) {
+                if (!isSurfaceStarted || gate.isRateLimited(clock.now())) return@launch
+                when (attemptAndWait()) {
+                    Attempt.Answered -> return@launch
+                    Attempt.Held -> delay(CYCLE_POLL)
+                    Attempt.Failed -> {
+                        attempts += 1
+                        if (attempts < CYCLE_BACKOFF.size) delay(CYCLE_BACKOFF[attempts])
+                    }
+                }
+            }
+        }
+    }
+
+    private enum class Attempt { Answered, Failed, Held }
+
+    private suspend fun attemptAndWait(): Attempt {
+        val before = inFlight?.takeIf { it.isActive }
+        trigger()
+        val running = inFlight?.takeIf { it.isActive } ?: before
+        if (running == null) {
+            // Held: by the floor after a fresh answer, or by the gap after a failure.
+            return if (lastFetchSucceeded) Attempt.Answered else Attempt.Held
+        }
+        running.join()
+        return if (lastFetchSucceeded) Attempt.Answered else Attempt.Failed
+    }
 
     // A committed region shows from the held snapshot at once and is saved; the refresh that
     // follows goes through the usual holds (iOS refresh policy, "Region change").
@@ -166,7 +208,9 @@ class StatusController(
         }
     }
 
-    private suspend fun fetch(): Boolean {
+    private suspend fun fetch(): Boolean = doFetch().also { lastFetchSucceeded = it }
+
+    private suspend fun doFetch(): Boolean {
         try {
             val fetched = provider.fetchAlerts()
             gate.recordSuccess(clock.now())
@@ -196,3 +240,7 @@ class StatusController(
         null -> StatusState.RegionUnavailable
     }
 }
+
+// The wait before each attempt of the CarPlay cycle; the first goes at once (REQ-REFRESH-004).
+private val CYCLE_BACKOFF = listOf(Duration.ZERO, 2.seconds, 4.seconds)
+private val CYCLE_POLL = 250.milliseconds

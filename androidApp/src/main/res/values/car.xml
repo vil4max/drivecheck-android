@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android Auto (spec 004). The row titles stay fixed so a status change is a template refresh,
+     not a new template (the PaneTemplate quota). -->
+<resources>
+    <string name="car_row_nearby">Nearby</string>
+    <string name="car_nothing_nearby">No alerts nearby</string>
+</resources>

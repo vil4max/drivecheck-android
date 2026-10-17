@@ -11,12 +11,13 @@ import androidx.car.app.model.Pane
 import androidx.car.app.model.PaneTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
+import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.lifecycleScope
 import io.github.vil4max.drivecheck.R
 import io.github.vil4max.drivecheck.domain.AlertRegion
 import io.github.vil4max.drivecheck.nameRes
-import io.github.vil4max.drivecheck.nearbyText
 import io.github.vil4max.drivecheck.status.DisplayPhase
+import io.github.vil4max.drivecheck.status.NearbyLine
 import io.github.vil4max.drivecheck.status.StatusPresentation
 import io.github.vil4max.drivecheck.titleRes
 import kotlinx.coroutines.flow.StateFlow
@@ -32,9 +33,10 @@ data class CarStatus(
     val isLocationDenied: Boolean,
 )
 
-// The iOS CarPlay screen (REQ-SURF-006): the status in the title, the region with its update time,
-// the nearby row only when a neighbouring region is under alert (REQ-SURF-005), the location row
-// only when access is denied, and Refresh as the only action. No map, no tabs.
+// The iOS CarPlay screen (REQ-SURF-006) within the PaneTemplate quota: the host counts a change of
+// the title, the row count or a row title as a new template and closes the app after a few, so
+// those stay fixed. The status, its time and the nearby names are row texts, which a refresh may
+// change; the colour is the status row's icon.
 class CarStatusScreen(
     carContext: CarContext,
     private val status: StateFlow<CarStatus>,
@@ -47,45 +49,59 @@ class CarStatusScreen(
     override fun onGetTemplate(): Template {
         val current = status.value
         val presentation = current.presentation
+        val statusRow = Row.Builder()
+            .setTitle(carContext.getString(R.string.tab_status))
+            .addText(carContext.getString(statusWord(presentation)))
+            .addText(carContext.getString(current.region.nameRes()) + " · " + meta(presentation, current.isChecking))
+        icon(presentation)?.let(statusRow::setImage)
+        val nearbyRow = Row.Builder()
+            .setTitle(carContext.getString(R.string.car_row_nearby))
+            .addText(nearbyNames(presentation.nearbyAlerts) ?: carContext.getString(R.string.car_nothing_nearby))
+        if (current.isLocationDenied) nearbyRow.addText(carContext.getString(R.string.location_denied))
         val pane = Pane.Builder()
-        val regionRow = Row.Builder().setTitle(carContext.getString(current.region.nameRes()))
-        meta(presentation, current.isChecking)?.let(regionRow::addText)
-        pane.addRow(regionRow.build())
-        nearbyText(carContext.resources, presentation.nearbyAlerts)?.let { pane.addRow(Row.Builder().setTitle(it).build()) }
-        if (current.isLocationDenied) pane.addRow(Row.Builder().setTitle(carContext.getString(R.string.location_denied)).build())
-        icon(presentation.phase)?.let(pane::setImage)
-        pane.addAction(
-            Action.Builder()
-                .setTitle(carContext.getString(R.string.action_refresh))
-                .setOnClickListener(onRefresh)
-                .build(),
-        )
+            .addRow(statusRow.build())
+            .addRow(nearbyRow.build())
+            .addAction(
+                Action.Builder()
+                    .setTitle(carContext.getString(R.string.action_refresh))
+                    .setOnClickListener(onRefresh)
+                    .build(),
+            )
         return PaneTemplate.Builder(pane.build())
-            .setHeader(Header.Builder().setTitle(carContext.getString(presentation.phase.titleRes())).build())
+            .setHeader(Header.Builder().setTitle(carContext.getString(R.string.app_name)).build())
             .build()
     }
 
-    // As on the phone: "Updated HH:mm" for current data, "Last known: {status} · HH:mm" once stale.
-    private fun meta(presentation: StatusPresentation, isChecking: Boolean): String? {
+    // REQ-REFRESH-007: any stale snapshot reads "No Current Data" with its age, never a status.
+    private fun statusWord(presentation: StatusPresentation): Int =
+        if (presentation.isStale) R.string.status_no_current_data else presentation.phase.titleRes()
+
+    private fun meta(presentation: StatusPresentation, isChecking: Boolean): String {
         val checkedAt = presentation.checkedAt
-        return when {
+        val age = when {
             presentation.phase == DisplayPhase.Unavailable -> carContext.getString(R.string.hint_unavailable)
-            checkedAt == null -> if (isChecking) carContext.getString(R.string.status_checking) else null
-            presentation.isStale -> carContext.getString(
-                R.string.status_meta_last_known,
-                carContext.getString(if (presentation.phase == DisplayPhase.Alarm) R.string.status_short_alarm else R.string.status_quiet),
-                time(checkedAt),
-            )
+            checkedAt == null -> carContext.getString(R.string.status_checking)
             else -> carContext.getString(R.string.status_updated, time(checkedAt))
         }
+        return if (isChecking && checkedAt != null) age + " · " + carContext.getString(R.string.status_checking) else age
+    }
+
+    private fun nearbyNames(regions: List<AlertRegion>): String? {
+        val line = NearbyLine.of(regions) ?: return null
+        val names = line.names.joinToString(", ") { carContext.getString(it.nameRes()) }
+        return if (line.more > 0) carContext.getString(R.string.nearby_names_more, names, line.more) else names
     }
 
     private fun time(instant: Instant): String = DateFormat.getTimeFormat(carContext).format(Date(instant.toEpochMilliseconds()))
 
-    // The glyph repeats the title in the host's own colours; the status never depends on colour alone.
-    private fun icon(phase: DisplayPhase): CarIcon? = when (phase) {
-        DisplayPhase.Alarm -> CarIcon.Builder(CarIcon.ALERT).setTint(CarColor.RED).build()
-        DisplayPhase.StayAlert -> CarIcon.Builder(CarIcon.ALERT).setTint(CarColor.YELLOW).build()
-        else -> null
+    // The icon repeats the status word in the host's colours; stale data gets none (REQ-REFRESH-007).
+    private fun icon(presentation: StatusPresentation): CarIcon? {
+        if (presentation.isStale) return null
+        return when (presentation.phase) {
+            DisplayPhase.Alarm -> CarIcon.Builder(CarIcon.ALERT).setTint(CarColor.RED).build()
+            DisplayPhase.StayAlert -> CarIcon.Builder(CarIcon.ALERT).setTint(CarColor.YELLOW).build()
+            DisplayPhase.NoAlert -> CarIcon.Builder(IconCompat.createWithResource(carContext, R.drawable.ic_car_clear)).setTint(CarColor.GREEN).build()
+            else -> null
+        }
     }
 }
