@@ -264,6 +264,32 @@ class StatusControllerTest {
     }
 
     @Test
+    fun REQ_ANDROID_001_the_gap_counts_from_the_end_of_a_request_with_its_retry() = runTest {
+        val provider = ScriptedProvider(
+            listOf(
+                {
+                    clock.now += 3.seconds
+                    throw TransportFailure(TransportFailure.Kind.Timeout)
+                },
+                answer(snapshot()),
+            ),
+        )
+        val controller = controller(provider)
+        controller.onSurfaceStarted()
+        runCurrent()
+
+        clock.now += 0.5.seconds
+        controller.refresh()
+        runCurrent()
+        assertEquals(1, provider.calls)
+
+        clock.now += 1.5.seconds
+        controller.refresh()
+        runCurrent()
+        assertEquals(2, provider.calls)
+    }
+
+    @Test
     fun REQ_ANDROID_001_checking_is_shown_while_a_request_runs() = runTest {
         val slow = CompletableDeferred<Unit>()
         val provider = ScriptedProvider(
