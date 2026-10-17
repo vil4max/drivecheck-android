@@ -5,6 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import io.github.vil4max.drivecheck.domain.AlertRegion
 import io.github.vil4max.drivecheck.status.NearbyLine
+import java.text.Collator
+import java.util.Locale
 
 @StringRes
 fun AlertRegion.nameRes(): Int = when (this) {
@@ -33,6 +35,12 @@ fun AlertRegion.nameRes(): Int = when (this) {
     AlertRegion.Cherkasy -> R.string.region_cherkasy
     AlertRegion.Chernivtsi -> R.string.region_chernivtsi
     AlertRegion.Chernihiv -> R.string.region_chernihiv
+}
+
+// The locale's alphabet, as iOS localizedStandardCompare (REQ-ANDROID-003).
+fun regionNameOrder(locale: Locale): Comparator<String> {
+    val collator = Collator.getInstance(locale)
+    return Comparator { a, b -> collator.compare(a, b) }
 }
 
 // "Nearby: A, B +N" (REQ-SURF-005).

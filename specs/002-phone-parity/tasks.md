@@ -74,6 +74,12 @@ failing. After each group that changes the UI, the owner gets the Roborazzi scre
 
 Deviation: groups 6 and 7 landed as one commit, because the Details tab is part of the shell.
 
+## Backlog from the review
+
+- L6: on API 26–32 the blocking `Geocoder.getFromLocation` cannot be interrupted by the 15 s
+  timeout. The tracker stops waiting and defers, but the platform call may still run to its end.
+  The async API is used on 33+.
+
 ## Release guard
 
 - [ ] T018 Before any build reaches Google Play testers: the Android Auto screen exists (a later

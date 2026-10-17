@@ -14,6 +14,7 @@ import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -89,9 +90,10 @@ private fun AppRoot(viewModel: StatusViewModel, onOpenSettings: () -> Unit, onOp
         viewModel.onPermissionResult()
     }
 
+    val activity = LocalActivity.current
     LifecycleStartEffect(viewModel) {
         viewModel.onScreenStarted()
-        onStopOrDispose { viewModel.onScreenStopped() }
+        onStopOrDispose { viewModel.onScreenStopped(activity?.isChangingConfigurations == true) }
     }
 
     // REQ-REGION-010: the system prompt comes only after Get Started.
@@ -130,12 +132,16 @@ private fun AppRoot(viewModel: StatusViewModel, onOpenSettings: () -> Unit, onOp
 
     Box(Modifier.fillMaxSize()) {
         when {
-            showRegions -> RegionList.of(snapshot, state.region) { resources.getString(it.nameRes()) }
-                ?.let { RegionListScreen(it, onBack = { showRegions = false }) }
+            showRegions -> RegionList.of(
+                snapshot,
+                state.region,
+                name = { resources.getString(it.nameRes()) },
+                comparator = regionNameOrder(resources.configuration.locales[0]),
+            )?.let { RegionListScreen(it, onBack = { showRegions = false }) }
             tab == Tab.Status -> StatusContent(
                 presentation = state.presentation,
                 regionName = stringResource(state.region.nameRes()),
-                isChecking = state.isChecking,
+                isChecking = state.isDriverRefreshing,
                 onRefresh = viewModel::refresh,
                 locationDenied = state.isLocationDenied,
                 onOpenSettings = onOpenSettings,

@@ -36,7 +36,7 @@ class PlatformLocationSource(private val context: Context) {
         try {
             providers.forEach { provider ->
                 manager.getLastKnownLocation(provider)?.let { trySend(it.toFix()) }
-                manager.requestLocationUpdates(provider, 0L, MIN_DISTANCE_M, listener, Looper.getMainLooper())
+                manager.requestLocationUpdates(provider, MIN_TIME_MS, MIN_DISTANCE_M, listener, Looper.getMainLooper())
             }
         } catch (denied: SecurityException) {
             close()
@@ -60,6 +60,8 @@ class PlatformLocationSource(private val context: Context) {
 
     private companion object {
         const val MIN_DISTANCE_M = 2000f
+        // Lookups run at most every 60 s anyway (REQ-REGION-005); a 30 s minimum spares the GPS.
+        const val MIN_TIME_MS = 30_000L
     }
 }
 
