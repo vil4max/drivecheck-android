@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.kotlinSerialization)
+    // The Android-KMP library plugin lints only its host tests; this plugin lints androidMain too,
+    // so an API-level call above minSdk (NewApi) fails the gate.
+    alias(libs.plugins.androidLint)
 }
 
 kotlin {
