@@ -26,3 +26,4 @@ DerivedData/
 *.jks
 *.keystore
 keystore.properties
+.agents/project-context.yaml
