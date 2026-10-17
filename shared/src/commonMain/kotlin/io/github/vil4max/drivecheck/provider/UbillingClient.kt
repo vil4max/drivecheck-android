@@ -3,6 +3,7 @@ package io.github.vil4max.drivecheck.provider
 import io.github.vil4max.drivecheck.domain.AlertRegion
 import io.github.vil4max.drivecheck.domain.AlertStatus
 import io.github.vil4max.drivecheck.domain.AlertsSnapshot
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
@@ -17,9 +18,20 @@ class UbillingClient(
     private val log: ProviderLog = ProviderLog {},
 ) {
     private val reportedUnknownKeys = mutableSetOf<String>()
+
+    // Consecutive 429s escalate the backoff (REQ-REFRESH-005). Only a decoded answer resets it:
+    // a 5xx or a garbled body says nothing about whether the host stopped rate limiting.
+    private var rateLimitStreak = 0
     private val stateLock = Mutex()
 
-    suspend fun fetchAlerts(): AlertsSnapshot = fetchOnce()
+    suspend fun fetchAlerts(): AlertsSnapshot = try {
+        fetchOnce()
+    } catch (failure: TransportFailure) {
+        if (!failure.isTransient) throw failure
+        log.info("Transient Ubilling failure ${failure.kind}, retrying once")
+        delay(TRANSIENT_RETRY_DELAY)
+        fetchOnce()
+    }
 
     private suspend fun fetchOnce(): AlertsSnapshot {
         val response = transport.execute(
@@ -32,6 +44,7 @@ class UbillingClient(
         } catch (error: IllegalArgumentException) {
             throw ProviderFailure.Undecodable(bodyPrefix(response.body), error)
         }
+        stateLock.withLock { rateLimitStreak = 0 }
 
         val statuses = mutableMapOf<AlertRegion, AlertStatus>()
         for ((key, state) in feed.states) {
@@ -45,7 +58,13 @@ class UbillingClient(
         return AlertsSnapshot(feed.source, KyivTime.parseCachedAt(feed.cachedat), fetchedAt, statuses)
     }
 
-    private fun check(response: HttpResponse) {
+    private suspend fun check(response: HttpResponse) {
+        if (response.status == 429) {
+            val attempt = stateLock.withLock { ++rateLimitStreak }
+            val until = RetryAfter.deadline(response.headers["retry-after"], clock.now(), attempt)
+            log.info("Ubilling HTTP 429, holding until $until")
+            throw ProviderFailure.RateLimited(until)
+        }
         if (response.status !in 200..299) {
             throw ProviderFailure.HttpStatus(response.status, bodyPrefix(response.body))
         }
@@ -69,6 +88,7 @@ class UbillingClient(
 
     companion object {
         const val ENDPOINT = "https://ubilling.net.ua/aerialalerts/"
+        val TRANSIENT_RETRY_DELAY = 2.seconds
 
         fun userAgent(appVersion: String) = "DriveCheck/$appVersion (Android)"
 
