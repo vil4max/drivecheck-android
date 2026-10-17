@@ -103,7 +103,7 @@ Given the region follows the location\
 When a location fix arrives\
 Then fixes less accurate than 1 km or older than 60 s are dropped; reverse geocoding runs only after ≥ 60 s and ≥ 5 km since the last geocode, or after 60 s alone while a candidate region is pending or after a resolve that produced no region; a fix the interval does not yet allow, or whose lookup failed, is evaluated again when the wait ends; each lookup is bounded at 15 s and a timeout counts as a failure
 
-Differs from iOS: updates come from the platform `LocationManager` (network and GPS providers, minimum distance 2000 m), with no Google Play services. "Never pause automatically" has no Android counterpart; updates run while a tab is started.
+Differs from iOS: updates come from the platform `LocationManager` (network and GPS providers, minimum distance 2000 m), with no Google Play services. "Never pause automatically" has no Android counterpart; updates run while a tab is started. Android lets the driver grant approximate location only, whose fixes are about 2–3 km accurate; with approximate access only, the accuracy limit is 5 km instead of 1 km, which still resolves an oblast.
 
 ### REQ-REGION-006 — Region switch hysteresis
 

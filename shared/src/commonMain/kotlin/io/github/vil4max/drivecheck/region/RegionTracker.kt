@@ -49,6 +49,10 @@ class RegionTracker(private val geocoder: ReverseGeocoder, private val clock: Cl
     var isOutsideUkraine = false
         private set
 
+    // Android-only: with approximate access only, fixes are about 2–3 km accurate, so the iOS 1 km
+    // filter would drop every one; 5 km still resolves an oblast (spec 002, REQ-REGION-005).
+    var approximateOnly = false
+
     // isRetry re-evaluates a deferred fix: a parked device may deliver no newer fix, so the deferred
     // one stays the best evidence even once it is older than 60 s.
     suspend fun evaluate(fix: LocationFix, current: AlertRegion, isRetry: Boolean = false): RegionOutcome {
@@ -116,7 +120,8 @@ class RegionTracker(private val geocoder: ReverseGeocoder, private val clock: Cl
     }
 
     private fun isAcceptable(fix: LocationFix, now: Instant, checksAge: Boolean): Boolean =
-        fix.accuracyMeters >= 0 && fix.accuracyMeters <= MAX_ACCURACY_M &&
+        fix.accuracyMeters >= 0 &&
+            fix.accuracyMeters <= (if (approximateOnly) APPROXIMATE_MAX_ACCURACY_M else MAX_ACCURACY_M) &&
             (!checksAge || now - fix.timestamp <= MAX_FIX_AGE)
 
     // The interval bounds the lookup rate; it never decides that a needed lookup is dropped. A
@@ -145,6 +150,7 @@ class RegionTracker(private val geocoder: ReverseGeocoder, private val clock: Cl
 
     companion object {
         const val MAX_ACCURACY_M = 1000.0
+        const val APPROXIMATE_MAX_ACCURACY_M = 5000.0
         val MAX_FIX_AGE = 60.seconds
         val GEOCODE_MIN_INTERVAL = 60.seconds
         const val GEOCODE_MIN_DISTANCE_M = 5000.0

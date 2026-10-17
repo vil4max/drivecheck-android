@@ -80,12 +80,8 @@ class PeriodicRefreshTest {
 
     @Test
     fun REQ_REFRESH_002_a_scheduled_poll_is_skipped_inside_the_rate_limit_window() = runTest {
-        var limitedUntil: Instant? = null
         val provider = CountingProvider { call ->
-            if (call == 1) {
-                limitedUntil = clock().now() + 90.seconds
-                throw ProviderFailure.RateLimited(limitedUntil!!)
-            }
+            if (call == 1) throw ProviderFailure.RateLimited(clock().now() + 90.seconds)
             snapshot(AlertStatus.Quiet)
         }
         val controller = controller(provider)
