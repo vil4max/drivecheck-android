@@ -4,8 +4,26 @@ Drive Check shows a driver in Ukraine whether their region is under an air raid 
 glance, without a map to read or an account to create. This repository is its Android version;
 the iOS app is [on the App Store](https://apps.apple.com/app/id6793023910).
 
-**Status:** in development; the first release goes to Google Play. The first build shows Kyiv
-city's alert status and its update time, with Refresh.
+**Status:** 1.0.0 is out as an APK on GitHub; Google Play follows.
+
+## Download
+
+Get `DriveCheck-1.0.0.apk` from the [latest release](https://github.com/vil4max/drivecheck-android/releases/latest)
+and install it on Android 8.0 or later. Android asks once to allow installs from the app you
+open the file with (the browser or the file manager). If a later Google Play build will not
+install over it, uninstall the APK first.
+
+What 1.0 does:
+- shows the current region's status and when it was checked;
+- the region follows your location;
+- alerts in neighbouring regions;
+- the alert map;
+- a home-screen widget and a quick-settings tile;
+- a lock-screen notification while your region is under alert, once the app or the widget sees it.
+
+Alert data is informational only; it is not a push alert service. Follow official instructions.
+There is no Android Auto screen in 1.0 ([why](specs/004-android-auto/spec.md)).
+[Privacy policy](https://vil4max.github.io/drivecheck-android/privacy-policy.html).
 
 ## Stack
 
