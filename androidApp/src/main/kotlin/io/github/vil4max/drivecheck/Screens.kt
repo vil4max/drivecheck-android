@@ -22,11 +22,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -253,6 +257,9 @@ fun DetailsScreen(
     onOpenSource: () -> Unit,
     versionName: String,
     versionCode: Int,
+    notification: NotificationSwitchState = NotificationSwitchState(isOn = false, isBlocked = false),
+    onNotificationChange: (Boolean) -> Unit = {},
+    onOpenNotificationSettings: () -> Unit = {},
 ) {
     Column(
         Modifier
@@ -306,6 +313,8 @@ fun DetailsScreen(
                 }
             }
         }
+        DetailsHeader(stringResource(R.string.details_section_notification))
+        NotificationSwitchCard(notification, onNotificationChange, onOpenNotificationSettings)
         if (locationDenied) {
             DetailsHeader(stringResource(R.string.details_section_location))
             LocationDeniedCard(onOpenSettings)
@@ -344,6 +353,45 @@ fun DetailsScreen(
         Spacer(Modifier.height(20.dp))
         Text(stringResource(R.string.details_version, versionName, versionCode), fontSize = 14.sp, color = DriveCheckColors.textSecondary)
         Spacer(Modifier.height(112.dp))
+    }
+}
+
+// REQ-SURF-008: while Android blocks notifications the switch reads off, cannot be turned on,
+// and offers the way to Android settings.
+@Composable
+fun NotificationSwitchCard(state: NotificationSwitchState, onChange: (Boolean) -> Unit, onOpenSettings: () -> Unit) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .background(DriveCheckColors.surface, RoundedCornerShape(24.dp))
+            .border(1.dp, DriveCheckColors.surfaceStroke, RoundedCornerShape(24.dp))
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .toggleable(value = state.isOn, enabled = !state.isBlocked, role = Role.Switch, onValueChange = onChange),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.notification_switch), fontSize = 18.sp)
+                Text(stringResource(R.string.notification_switch_caption), fontSize = 15.sp, color = DriveCheckColors.textSecondary)
+            }
+            Spacer(Modifier.width(12.dp))
+            Switch(checked = state.isOn, onCheckedChange = null, enabled = !state.isBlocked)
+        }
+        if (state.isBlocked) {
+            Text(stringResource(R.string.notifications_blocked), fontSize = 15.sp, color = DriveCheckColors.textSecondary)
+            Button(
+                onClick = onOpenSettings,
+                modifier = Modifier.heightIn(min = 48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = DriveCheckColors.buttonFill, contentColor = Color.White),
+            ) {
+                Text(stringResource(R.string.location_open_settings))
+            }
+        }
     }
 }
 

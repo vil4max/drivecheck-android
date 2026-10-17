@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -64,7 +65,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             DriveCheckTheme {
                 Surface {
-                    AppRoot(viewModel, onOpenSettings = ::openAppSettings, onOpenSource = ::openSource)
+                    AppRoot(
+                        viewModel,
+                        onOpenSettings = ::openAppSettings,
+                        onOpenNotificationSettings = ::openNotificationSettings,
+                        onOpenSource = ::openSource,
+                    )
                 }
             }
         }
@@ -74,6 +80,10 @@ class MainActivity : ComponentActivity() {
         startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null)))
     }
 
+    private fun openNotificationSettings() {
+        startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, packageName))
+    }
+
     private fun openSource() {
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wiki.ubilling.net.ua/doku.php?id=aerialalertsapi")))
     }
@@ -81,7 +91,12 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AppRoot(viewModel: StatusViewModel, onOpenSettings: () -> Unit, onOpenSource: () -> Unit) {
+private fun AppRoot(
+    viewModel: StatusViewModel,
+    onOpenSettings: () -> Unit,
+    onOpenNotificationSettings: () -> Unit,
+    onOpenSource: () -> Unit,
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val mapState by viewModel.mapState.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableStateOf(Tab.Status) }
@@ -90,8 +105,30 @@ private fun AppRoot(viewModel: StatusViewModel, onOpenSettings: () -> Unit, onOp
         viewModel.onPermissionResult()
     }
 
+    // REQ-SURF-008: re-read on every start, since Android settings may have changed meanwhile.
+    val context = LocalContext.current
+    val notificationSettings = remember { NotificationSettings(context) }
+    var notification by remember { mutableStateOf(notificationSettings.state()) }
+    fun applyNotificationChange() {
+        notification = notificationSettings.state()
+        Surfaces.updateAll(context)
+    }
+    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (!granted) notificationSettings.onPermissionRefused()
+        applyNotificationChange()
+    }
+    val onNotificationChange: (Boolean) -> Unit = { on ->
+        notificationSettings.isChosen = on
+        if (on && notificationSettings.needsPermission() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            applyNotificationChange()
+        }
+    }
+
     val activity = LocalActivity.current
     LifecycleStartEffect(viewModel) {
+        notification = notificationSettings.state()
         viewModel.onScreenStarted()
         onStopOrDispose { viewModel.onScreenStopped(activity?.isChangingConfigurations == true) }
     }
@@ -160,6 +197,9 @@ private fun AppRoot(viewModel: StatusViewModel, onOpenSettings: () -> Unit, onOp
                 onOpenSource = onOpenSource,
                 versionName = BuildConfig.VERSION_NAME,
                 versionCode = BuildConfig.VERSION_CODE,
+                notification = notification,
+                onNotificationChange = onNotificationChange,
+                onOpenNotificationSettings = onOpenNotificationSettings,
             )
         }
         Box(Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(bottom = 12.dp)) {
