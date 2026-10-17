@@ -4,7 +4,8 @@ Drive Check shows a driver in Ukraine whether their region is under an air raid 
 glance, without a map to read or an account to create. This repository is its Android version;
 the iOS app is [on the App Store](https://apps.apple.com/app/id6793023910).
 
-**Status:** in development; the first release goes to Google Play.
+**Status:** in development; the first release goes to Google Play. The first build shows Kyiv
+city's alert status and its update time, with Refresh.
 
 ## Stack
 
