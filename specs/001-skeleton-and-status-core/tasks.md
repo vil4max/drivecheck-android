@@ -23,19 +23,23 @@ Commit: `docs(specs): specify the skeleton and status core`
 
 ## Group 1 — skeleton
 
-Commit: `build: create the project from the Kotlin Multiplatform template`
+Commit: `build: create the Kotlin Multiplatform skeleton`
 
-- [ ] T003 [Owner] Install Android Studio through the kit's Brewfile and run its setup wizard (SDK,
+Permitted deviation (owner, 2026-10-17, answer «A»): the session writes the skeleton by hand instead
+of the Android Studio wizard of D1, with current stable versions from primary sources (Maven
+Central, Google Maven, Gradle). Android Studio is still installed for the SDK and the emulator.
+
+- [x] T003 [Owner] Install Android Studio through the kit's Brewfile and run its setup wizard (SDK,
   licences); install the Kotlin Multiplatform IDE plugin if it is not included.
-- [ ] T004 [Owner] Run the wizard as `plan.md` "Skeleton" step 2 says, into a scratch folder (D1;
-  the web wizard fallback needs the owner's yes for the download).
-- [ ] T005 Copy the generated project into the repository as `plan.md` step 3 says; record the
-  versions and wizard options in the commit body.
-- [ ] T006 Check assumptions A1 to A4 and record the results in `plan.md`; migrate to the AGP 9
-  layout if A1 fails; enable host tests in `shared`; set minSdk per D3.
-- [ ] T007 Add the D3 libraries to `gradle/libs.versions.toml` at their current stable versions,
+- [x] T004 Write the skeleton by hand (deviation above): `shared` on the Android-KMP library plugin
+  with `iosArm64` and `iosSimulatorArm64`, `androidApp` with Compose, the Gradle wrapper with its
+  distribution checksum.
+- [x] T005 Record the versions in `gradle/libs.versions.toml` and the commit body.
+- [x] T006 Check assumptions A1 to A4 and record the results in `plan.md`; enable host tests in
+  `shared`; set minSdk per D3.
+- [x] T007 Add the D3 libraries to `gradle/libs.versions.toml` at their current stable versions,
   with the serialization plugin in `shared`.
-- [ ] T008 Prove A2: add a temporary failing test in `shared/src/commonTest`, see
+- [x] T008 Prove A2: add a temporary failing test in `shared/src/commonTest`, see
   `./gradlew check` fail, remove it, see `./gradlew check` pass.
 - [x] T009 Check that the local project marker `.agents/project-context.yaml` (`kind: personal`)
   is present in the checkout that builds. Project setup already wrote it in the main checkout; an
