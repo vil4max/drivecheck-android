@@ -17,8 +17,29 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // The upload key lives outside the repository; its path and passwords come from the owner's
+    // ~/.gradle/gradle.properties. Play App Signing holds the app signing key. Without them the
+    // release bundle is built unsigned.
+    val uploadKeystore = providers.gradleProperty("drivecheck.upload.storeFile").orNull
+    signingConfigs {
+        if (uploadKeystore != null) {
+            create("upload") {
+                storeFile = file(uploadKeystore)
+                storePassword = providers.gradleProperty("drivecheck.upload.storePassword").get()
+                keyAlias = providers.gradleProperty("drivecheck.upload.keyAlias").get()
+                keyPassword = providers.gradleProperty("drivecheck.upload.keyPassword").get()
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            if (uploadKeystore != null) signingConfig = signingConfigs.getByName("upload")
+        }
     }
 
     buildFeatures {
