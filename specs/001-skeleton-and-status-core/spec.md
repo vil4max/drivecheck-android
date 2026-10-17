@@ -167,6 +167,10 @@ the periodic refresh amends this trigger list. The rate argument: after a succes
 allows at most one request per 10 s per device whatever the triggers, a twentieth of the 2 rps
 host limit; after a failure, attempts are bounded by the driver's taps and one 2 s retry each.
 
+Amended 2026-10-17 by spec 002: clause 1 gains the one shared periodic refresh (REQ-REFRESH-002),
+and the trigger list gains the inline map's first appearance in a foreground session
+(REQ-ANDROID-002).
+
 ### REQ-REFRESH-001 — Fetch only for an active surface
 
 Status: approved
@@ -253,6 +257,10 @@ this feature does not have, so the stale marker waits for the spec that adds the
 that spec amends this requirement to the full iOS text. Until then the update time is the only age
 signal on the screen.
 
+Amended 2026-10-17 by spec 002, to the full iOS text: when `now − checkedAt` exceeds 2 × the current
+base interval (REQ-REFRESH-002), the screen keeps the last known phase and shows it as stale (grey
+with a clock for a quiet status; a stale alarm stays red).
+
 ### REQ-REFRESH-010 — Fetch floor and cache serving
 
 Status: approved
@@ -317,6 +325,9 @@ status word standing alone is Title Case and an explaining sentence is sentence 
 Differs from iOS: only the phone Status screen exists, so only the full form is used; the short
 form arrives with the widget spec. The error hint names the Refresh button, where iOS says "Pull to
 refresh and try again"; its uk and ru text is new, approved by the owner at the start gate.
+
+Amended 2026-10-17 by spec 002: the region list's status pills use the short form ("No Alert" /
+"Alert" and their uk and ru forms, as in the iOS short-form table).
 
 ### REQ-PROVIDER-003 — Informational source
 
