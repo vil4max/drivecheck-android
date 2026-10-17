@@ -95,8 +95,9 @@ class StatusController(
     // follows goes through the usual holds (iOS refresh policy, "Region change").
     fun selectRegion(region: AlertRegion) {
         if (region == _region.value) return
-        _region.value = region
+        // Saved before it is published: the widget redraws from the store on each emission.
         store.saveRegion(region)
+        _region.value = region
         _snapshot.value?.let { _state.value = resolve(it) }
         trigger()
     }
@@ -165,8 +166,8 @@ class StatusController(
         try {
             val fetched = provider.fetchAlerts()
             gate.recordSuccess(clock.now())
-            _snapshot.value = fetched
             store.saveSnapshot(fetched)
+            _snapshot.value = fetched
             _state.value = resolve(fetched)
             return true
         } catch (cancelled: CancellationException) {

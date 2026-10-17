@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import io.github.vil4max.drivecheck.domain.AlertRegion
 import io.github.vil4max.drivecheck.map.MapController
 import io.github.vil4max.drivecheck.map.MapState
-import io.github.vil4max.drivecheck.provider.AndroidProviderLog
 import io.github.vil4max.drivecheck.provider.UbillingClient
 import io.github.vil4max.drivecheck.provider.UrlConnectionTransport
 import io.github.vil4max.drivecheck.refresh.AndroidRefreshEnvironment
@@ -50,7 +49,7 @@ class StatusViewModel(application: Application) : AndroidViewModel(application) 
     private val store = PreferencesStatusStore(application)
     private val location = PlatformLocationSource(application)
     private val controller = StatusController(
-        provider = client,
+        provider = AppGraph.client,
         clock = Clock.System,
         scope = viewModelScope,
         store = store,
@@ -74,6 +73,10 @@ class StatusViewModel(application: Application) : AndroidViewModel(application) 
         combine(isStarted, coordinator.shouldTrackLocation) { started, allowed -> started && allowed }
             .flatMapLatest { track -> if (track) location.fixes() else emptyFlow() }
             .onEach(coordinator::onFix)
+            .launchIn(viewModelScope)
+        // The widget and the other surfaces read the store, so they follow every saved fetch.
+        combine(controller.snapshot, controller.region) { _, _ -> }
+            .onEach { Surfaces.updateAll(application) }
             .launchIn(viewModelScope)
     }
 
@@ -153,15 +156,4 @@ class StatusViewModel(application: Application) : AndroidViewModel(application) 
     fun dismissNotice() = coordinator.dismissNotice()
 
     fun dismissOutsideSheet() = coordinator.dismissOutsideSheet()
-
-    private companion object {
-        // One client per process, so the unknown-key log and the 429 streak span every screen
-        // instance (REQ-REGION-001, REQ-REFRESH-005).
-        val client = UbillingClient(
-            transport = UrlConnectionTransport(),
-            clock = Clock.System,
-            userAgent = UbillingClient.userAgent(BuildConfig.VERSION_NAME),
-            log = AndroidProviderLog(),
-        )
-    }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_title">Статус тревоги</string>
+    <string name="widget_description">Текущий статус тревоги в области</string>
+    <string name="widget_open_app">Откройте приложение, чтобы обновить</string>
+    <string name="widget_warning_time">⚠ %1$s</string>
+    <string name="notification_may_be_outdated">Возможно, устарело. Откройте приложение.</string>
+    <string name="notification_channel">Воздушная тревога</string>
+    <string name="details_section_notification">УВЕДОМЛЕНИЕ</string>
+    <string name="notification_switch">Уведомление во время тревоги</string>
+    <string name="notification_switch_caption">Экран блокировки и шторка уведомлений, до отбоя</string>
+    <string name="notifications_blocked">Уведомления выключены в настройках Android</string>
+</resources>
