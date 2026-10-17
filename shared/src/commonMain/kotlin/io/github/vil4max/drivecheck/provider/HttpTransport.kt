@@ -23,6 +23,10 @@ class TransportFailure(val kind: Kind, cause: Throwable? = null) :
     val isTransient: Boolean get() = kind != Kind.Other
 }
 
+fun interface AlertsProvider {
+    suspend fun fetchAlerts(): io.github.vil4max.drivecheck.domain.AlertsSnapshot
+}
+
 fun interface ProviderLog {
     fun info(message: String)
 }

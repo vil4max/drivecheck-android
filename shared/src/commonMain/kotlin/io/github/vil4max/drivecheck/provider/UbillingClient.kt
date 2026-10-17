@@ -16,7 +16,7 @@ class UbillingClient(
     private val clock: Clock,
     private val userAgent: String,
     private val log: ProviderLog = ProviderLog {},
-) {
+) : AlertsProvider {
     private val reportedUnknownKeys = mutableSetOf<String>()
 
     // Consecutive 429s escalate the backoff (REQ-REFRESH-005). Only a decoded answer resets it:
@@ -24,7 +24,7 @@ class UbillingClient(
     private var rateLimitStreak = 0
     private val stateLock = Mutex()
 
-    suspend fun fetchAlerts(): AlertsSnapshot = try {
+    override suspend fun fetchAlerts(): AlertsSnapshot = try {
         fetchOnce()
     } catch (failure: TransportFailure) {
         if (!failure.isTransient) throw failure
