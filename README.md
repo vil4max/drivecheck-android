@@ -19,10 +19,12 @@ What 1.0 does:
 - alerts in neighbouring regions;
 - the alert map;
 - a home-screen widget and a quick-settings tile;
-- a lock-screen notification while your region is under alert, once the app or the widget sees it.
+- a lock-screen notification while your region is under alert, once the app or the widget sees it;
+- an Android Auto screen with the status, the region, nearby alerts and Refresh.
 
 Alert data is informational only; it is not a push alert service. Follow official instructions.
-There is no Android Auto screen in 1.0 ([why](specs/004-android-auto/spec.md)).
+The Android Auto screen appears in a car only when the app is installed from Google Play: Android
+Auto's "unknown sources" option does not cover car apps like this one ([spec 004](specs/004-android-auto/spec.md)).
 [Privacy policy](https://vil4max.github.io/drivecheck-android/privacy-policy.html).
 
 ## Stack
