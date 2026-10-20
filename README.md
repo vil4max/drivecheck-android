@@ -25,7 +25,7 @@ What 1.0 does:
 Alert data is informational only; it is not a push alert service. Follow official instructions.
 The Android Auto screen appears in a car only when the app is installed from Google Play: Android
 Auto's "unknown sources" option does not cover car apps like this one ([spec 004](specs/004-android-auto/spec.md)).
-[Privacy policy](https://vil4max.github.io/drivecheck-android/privacy-policy.html).
+[Privacy policy](https://vil4max.com/drivecheck-android/privacy-policy).
 
 ## Stack
 
