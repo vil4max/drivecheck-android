@@ -18,7 +18,7 @@ Android Auto is named because 1.0 ships its car screen ([spec 004](../004-androi
 | Tags | | (owner's choice in Play Console) |
 | Contact email | | the owner's developer email (Play Console account) |
 | Website | | https://github.com/vil4max/drivecheck-android |
-| Privacy policy | | https://vil4max.github.io/drivecheck-android/privacy-policy.html (GitHub Pages serves `main` `/docs`; live once this slice merges) |
+| Privacy policy | | https://vil4max.com/drivecheck-android/privacy-policy (served by the site; source `docs/privacy-policy.html`) |
 
 ## en-US
 
